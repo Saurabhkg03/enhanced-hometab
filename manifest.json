@@ -1,0 +1,10 @@
+{
+	"id": "enhanced-hometab",
+	"name": "Enhanced Hometab",
+	"version": "1.0.0",
+	"minAppVersion": "1.6.0",
+	"description": "An intelligent, high-performance dashboard and homepage for Obsidian.",
+	"author": "Antigravity",
+	"authorUrl": "",
+	"isDesktopOnly": false
+}

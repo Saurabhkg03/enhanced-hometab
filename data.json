@@ -1,0 +1,107 @@
+{
+  "widgets": {
+    "continue-working": {
+      "enabled": true
+    },
+    "quick-actions": {
+      "enabled": true
+    },
+    "pinned": {
+      "enabled": true
+    },
+    "recent-notes": {
+      "enabled": true
+    },
+    "daily-note": {
+      "enabled": true
+    },
+    "tags": {
+      "enabled": true
+    },
+    "backlinks": {
+      "enabled": true
+    },
+    "tasks": {
+      "enabled": true
+    }
+  },
+  "widgetOrder": [
+    "quick-actions",
+    "recent-notes",
+    "pinned",
+    "tags",
+    "continue-working",
+    "daily-note",
+    "backlinks"
+  ],
+  "launcherActions": [
+    {
+      "id": "new-note",
+      "hidden": false
+    },
+    {
+      "id": "new-folder",
+      "hidden": false
+    },
+    {
+      "id": "open-today",
+      "hidden": false
+    },
+    {
+      "id": "quick-capture",
+      "hidden": false
+    },
+    {
+      "id": "new-canvas",
+      "hidden": false
+    },
+    {
+      "id": "templates",
+      "hidden": false
+    },
+    {
+      "id": "calendar",
+      "hidden": false
+    }
+  ],
+  "greetingName": "Saurabh",
+  "showDate": true,
+  "replaceNewTabs": true,
+  "backgroundImage": "https://images.hdqwalls.com/download/deep-space-meditation-cosmic-brain-waves-1p-1366x768.jpg",
+  "backgroundOpacity": 0.4,
+  "enableGlassmorphism": true,
+  "recentSearches": [],
+  "pinnedSearches": [],
+  "continueWorkingData": {
+    "lastWorkspace": {
+      "timestamp": 1786085614154,
+      "tabsCount": 1,
+      "tabs": [
+        {
+          "path": "Untitled.md",
+          "title": "Untitled",
+          "type": "md"
+        }
+      ]
+    },
+    "lastCursorPosition": {
+      "path": "2026-08-06.md",
+      "title": "2026-08-06",
+      "timestamp": 1786042552176,
+      "line": 0,
+      "ch": 0
+    },
+    "lastOpenedNote": {
+      "path": "Untitled.md",
+      "title": "Untitled",
+      "timestamp": 1786085611153
+    },
+    "lastEditedNote": {
+      "path": "2026-08-06.md",
+      "title": "2026-08-06",
+      "timestamp": 1786042316174,
+      "line": 0,
+      "ch": 0
+    }
+  }
+}
