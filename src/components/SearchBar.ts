@@ -17,6 +17,9 @@ export class SearchBar {
     private searchResults: BionicSearchResult[] = [];
     private selectedIndex: number = -1;
 
+    private documentClickListener: ((e: MouseEvent) => void) | null = null;
+    private windowKeydownListener: ((e: KeyboardEvent) => void) | null = null;
+
     constructor(app: App, containerEl: HTMLElement, settingsManager: SettingsManager) {
         this.app = app;
         this.containerEl = containerEl;
@@ -25,6 +28,8 @@ export class SearchBar {
     }
 
     public render() {
+        this.destroy();
+
         this.containerEl.empty();
         this.containerEl.addClass("bionic-search-bar-container");
         
@@ -54,32 +59,49 @@ export class SearchBar {
             }
         });
         
-        document.addEventListener("click", (e) => {
+        this.documentClickListener = (e: MouseEvent) => {
             if (!this.containerEl.contains(e.target as Node)) {
                 this.hideResults();
             }
-        });
+        };
+        document.addEventListener("click", this.documentClickListener);
 
-        window.addEventListener(
-            "keydown",
-            (e: KeyboardEvent) => {
-                const isK = e.key?.toLowerCase() === "k" || e.code === "KeyK";
-                if ((e.ctrlKey || e.metaKey) && isK) {
-                    if (document.body.contains(this.containerEl)) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        this.inputEl.focus();
-                        this.inputEl.select();
-                        if (this.inputEl.value.trim().length > 0) {
-                            this.onInput();
-                        } else {
-                            this.showEmptyState();
-                        }
+        this.windowKeydownListener = (e: KeyboardEvent) => {
+            const isK = e.key?.toLowerCase() === "k" || e.code === "KeyK";
+            if ((e.ctrlKey || e.metaKey) && isK) {
+                if (document.body.contains(this.containerEl)) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.inputEl.focus();
+                    this.inputEl.select();
+                    if (this.inputEl.value.trim().length > 0) {
+                        this.onInput();
+                    } else {
+                        this.showEmptyState();
                     }
                 }
-            },
-            true
-        );
+            }
+        };
+        window.addEventListener("keydown", this.windowKeydownListener, true);
+    }
+
+    public destroy() {
+        if (this.debounceTimer) {
+            window.clearTimeout(this.debounceTimer);
+            this.debounceTimer = null;
+        }
+        if (this.documentClickListener) {
+            document.removeEventListener("click", this.documentClickListener);
+            this.documentClickListener = null;
+        }
+        if (this.windowKeydownListener) {
+            window.removeEventListener("keydown", this.windowKeydownListener, true);
+            this.windowKeydownListener = null;
+        }
+    }
+
+    private getNavigableItems(): HTMLElement[] {
+        return Array.from(this.resultsContainerEl.querySelectorAll<HTMLElement>('.bionic-search-result-item, .bionic-search-history-item'));
     }
 
     private showEmptyState() {
@@ -95,7 +117,6 @@ export class SearchBar {
         } else {
             if (pinned.length > 0) {
                 this.resultsContainerEl.createDiv({ cls: "bionic-search-section-title", text: "Pinned Searches" });
-                // We'll just render them as simple items for now
                 pinned.forEach(p => {
                     const el = this.resultsContainerEl.createDiv({ cls: "bionic-search-history-item" });
                     setIcon(el.createDiv({ cls: "history-icon" }), "pin");
@@ -128,6 +149,14 @@ export class SearchBar {
                     });
                 });
             }
+
+            const items = this.getNavigableItems();
+            items.forEach((item, index) => {
+                item.addEventListener("mouseenter", () => {
+                    this.selectedIndex = index;
+                    this.updateSelection();
+                });
+            });
         }
         this.resultsContainerEl.removeClass("hidden");
     }
@@ -136,7 +165,7 @@ export class SearchBar {
         let recent = this.settingsManager.settings.recentSearches || [];
         recent = recent.filter(r => r !== query);
         this.settingsManager.settings.recentSearches = recent;
-        this.settingsManager.saveSettings();
+        this.settingsManager.saveSettings(true);
         this.showEmptyState();
     }
 
@@ -146,7 +175,7 @@ export class SearchBar {
         recent.unshift(query);
         if (recent.length > 10) recent = recent.slice(0, 10);
         this.settingsManager.settings.recentSearches = recent;
-        this.settingsManager.saveSettings();
+        this.settingsManager.saveSettings(true);
     }
 
     private onInput() {
@@ -172,32 +201,27 @@ export class SearchBar {
     private onKeyDown(e: KeyboardEvent) {
         if (this.resultsContainerEl.hasClass("hidden")) return;
         
+        const items = this.getNavigableItems();
+        if (items.length === 0) return;
+
         if (e.key === "ArrowDown") {
             e.preventDefault();
-            if (this.searchResults.length > 0) {
-                this.selectedIndex = (this.selectedIndex + 1) % this.searchResults.length;
-                this.updateSelection();
-            }
+            this.selectedIndex = (this.selectedIndex + 1) % items.length;
+            this.updateSelection();
         } else if (e.key === "ArrowUp") {
             e.preventDefault();
-            if (this.searchResults.length > 0) {
-                this.selectedIndex = (this.selectedIndex - 1 + this.searchResults.length) % this.searchResults.length;
-                this.updateSelection();
+            if (this.selectedIndex <= 0) {
+                this.selectedIndex = items.length - 1;
+            } else {
+                this.selectedIndex = this.selectedIndex - 1;
             }
+            this.updateSelection();
         } else if (e.key === "Enter") {
             e.preventDefault();
-            if (this.selectedIndex >= 0 && this.selectedIndex < this.searchResults.length) {
-                this.addToHistory(this.inputEl.value.trim());
-                this.searchResults[this.selectedIndex].action();
-                this.hideResults();
-                this.inputEl.value = "";
-                this.inputEl.blur();
-            } else if (this.searchResults.length > 0) {
-                this.addToHistory(this.inputEl.value.trim());
-                this.searchResults[0].action();
-                this.hideResults();
-                this.inputEl.value = "";
-                this.inputEl.blur();
+            if (this.selectedIndex >= 0 && this.selectedIndex < items.length) {
+                items[this.selectedIndex].click();
+            } else if (items.length > 0) {
+                items[0].click();
             }
         } else if (e.key === "Escape") {
             this.hideResults();
@@ -206,11 +230,11 @@ export class SearchBar {
     }
 
     private updateSelection() {
-        const items = this.resultsContainerEl.querySelectorAll('.bionic-search-result-item');
+        const items = this.getNavigableItems();
         items.forEach((item, index) => {
             if (index === this.selectedIndex) {
                 item.addClass('is-selected');
-                (item as HTMLElement).scrollIntoView({ block: 'nearest' });
+                item.scrollIntoView({ block: 'nearest' });
             } else {
                 item.removeClass('is-selected');
             }

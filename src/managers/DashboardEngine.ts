@@ -27,6 +27,7 @@ export class DashboardEngine extends Component {
     private searchBar: SearchBar;
     private clockInterval: number | null = null;
     private vaultTimer: number | null = null;
+    private documentClickHandler: ((e: MouseEvent) => void) | null = null;
 
     constructor(app: App, containerEl: HTMLElement, settingsManager: SettingsManager) {
         super();
@@ -79,6 +80,9 @@ export class DashboardEngine extends Component {
 
     private registerVaultObservers() {
         const triggerWidgetRefresh = () => {
+            // Prevent background CPU burn if the dashboard isn't actively on screen
+            if (!this.containerEl.isShown()) return;
+
             if (this.vaultTimer) window.clearTimeout(this.vaultTimer);
             this.vaultTimer = window.setTimeout(() => {
                 this.widgetManager.refreshWidget("recent-notes");
@@ -87,7 +91,7 @@ export class DashboardEngine extends Component {
                 this.widgetManager.refreshWidget("backlinks");
                 this.widgetManager.refreshWidget("tags");
                 this.widgetManager.refreshWidget("pinned");
-            }, 150);
+            }, 500);
         };
 
         this.registerEvent(this.app.vault.on("modify", triggerWidgetRefresh));
@@ -98,16 +102,27 @@ export class DashboardEngine extends Component {
         this.registerEvent(this.app.workspace.on("active-leaf-change", triggerWidgetRefresh));
     }
 
+    private resolveWallpaperUrl(url: string): string {
+        if (!url) return "";
+        if (url.startsWith("local:")) {
+            const filePath = url.substring(6);
+            return this.app.vault.adapter.getResourcePath(filePath);
+        }
+        return url;
+    }
+
     private handleSettingsUpdated() {
         // Toggle Glassmorphism class directly without rebuilding page
         this.containerEl.toggleClass("bionic-glass-mode", !!this.settingsManager.settings.enableGlassmorphism);
 
         // Update Background directly
         if (this.bgEl) {
-            const bgUrl = this.settingsManager.settings.backgroundImage;
+            let bgUrl = this.settingsManager.settings.backgroundImage;
             if (bgUrl) {
+                bgUrl = this.resolveWallpaperUrl(bgUrl);
                 this.bgEl.style.backgroundImage = `url("${bgUrl}")`;
                 this.bgEl.style.opacity = this.settingsManager.settings.backgroundOpacity.toString();
+                this.bgEl.style.backgroundSize = this.settingsManager.settings.wallpaperFit || "cover";
             } else {
                 this.bgEl.remove();
                 this.bgEl = null;
@@ -139,9 +154,16 @@ export class DashboardEngine extends Component {
             window.clearTimeout(this.vaultTimer);
             this.vaultTimer = null;
         }
+        if (this.searchBar) {
+            this.searchBar.destroy();
+        }
         this.containerEl.empty();
         if (this.settingsEventRef) {
             this.app.workspace.offref(this.settingsEventRef);
+        }
+        if (this.documentClickHandler) {
+            document.removeEventListener("click", this.documentClickHandler);
+            this.documentClickHandler = null;
         }
     }
 
@@ -172,12 +194,15 @@ export class DashboardEngine extends Component {
     }
 
     private renderBackground() {
-        const bgUrl = this.settingsManager.settings.backgroundImage;
+        let bgUrl = this.settingsManager.settings.backgroundImage;
         if (!bgUrl) return;
+
+        bgUrl = this.resolveWallpaperUrl(bgUrl);
 
         this.bgEl = this.containerEl.createDiv({ cls: "bionic-dashboard-background" });
         this.bgEl.style.backgroundImage = `url("${bgUrl}")`;
         this.bgEl.style.opacity = this.settingsManager.settings.backgroundOpacity.toString();
+        this.bgEl.style.backgroundSize = this.settingsManager.settings.wallpaperFit || "cover";
     }
 
     private renderHeader() {
@@ -225,20 +250,24 @@ export class DashboardEngine extends Component {
     }
 
     private renderSearchArea() {
+        if (this.searchBar) {
+            this.searchBar.destroy();
+        }
         this.searchBar = new SearchBar(this.app, this.searchAreaEl, this.settingsManager);
         this.searchBar.render();
     }
 
     private renderSettingsMenu() {
-        const settingsBtnEl = this.containerEl.createDiv({ cls: "bionic-quick-settings-btn" });
+        const settingsBtnEl = this.containerEl.createEl("button", { cls: "bionic-quick-settings-btn" });
         setIcon(settingsBtnEl, "more-horizontal");
         
         const dropdownEl = this.containerEl.createDiv({ cls: "bionic-quick-settings-dropdown hidden" });
         
         // --- Background Image Settings ---
-        dropdownEl.createEl("div", { cls: "bionic-quick-settings-header", text: "Background Image" });
-        
-        const bgUrlWrapper = dropdownEl.createDiv({ cls: "bionic-settings-input-wrapper" });
+        dropdownEl.createEl("div", { cls: "bionic-quick-settings-header", text: "Wallpaper" });
+
+        // URL Input & Set Button
+        const bgUrlWrapper = dropdownEl.createDiv({ cls: "bionic-settings-input-wrapper bionic-wallpaper-input-wrapper" });
         const bgUrlInput = bgUrlWrapper.createEl("input", { 
             type: "text", 
             placeholder: "Image URL...",
@@ -246,12 +275,131 @@ export class DashboardEngine extends Component {
             cls: "bionic-settings-text-input"
         });
         
-        bgUrlInput.addEventListener("change", async () => {
-            this.settingsManager.settings.backgroundImage = bgUrlInput.value.trim();
+        const setBgBtn = bgUrlWrapper.createEl("button", { text: "Set", cls: "bionic-wallpaper-set-btn" });
+        
+        // Local Media Picker
+        const localPickerBtn = bgUrlWrapper.createEl("button", { cls: "bionic-wallpaper-local-btn", title: "Upload Local Image" });
+        setIcon(localPickerBtn, "image-plus");
+        const fileInput = bgUrlWrapper.createEl("input", {
+            type: "file",
+            attr: { accept: "image/*" },
+            cls: "bionic-wallpaper-file-input hidden"
+        });
+
+        localPickerBtn.addEventListener("click", () => fileInput.click());
+
+        const addWallpaperToHistory = async (url: string) => {
+            if (!url) return;
+            const settings = this.settingsManager.settings;
+            settings.backgroundImage = url;
+            // Remove if already exists to move to front
+            settings.recentWallpapers = settings.recentWallpapers.filter(w => w !== url);
+            settings.recentWallpapers.unshift(url);
+            if (settings.recentWallpapers.length > 9) {
+                settings.recentWallpapers = settings.recentWallpapers.slice(0, 9);
+            }
+            await this.settingsManager.saveSettings();
+            (this.app.workspace as any).trigger("enhanced-hometab:settings-updated");
+            this.renderWallpaperGallery(galleryContainer, bgUrlInput);
+        };
+
+        setBgBtn.addEventListener("click", () => {
+            addWallpaperToHistory(bgUrlInput.value.trim());
+        });
+
+        bgUrlInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                addWallpaperToHistory(bgUrlInput.value.trim());
+            }
+        });
+
+        fileInput.addEventListener("change", async (e) => {
+            const files = (e.target as HTMLInputElement).files;
+            if (files && files.length > 0) {
+                const file = files[0];
+                
+                // Helper to compress image
+                const compressImage = async (file: File): Promise<ArrayBuffer> => {
+                    return new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            const img = new Image();
+                            img.onload = () => {
+                                const canvas = document.createElement("canvas");
+                                const MAX_WIDTH = 1920;
+                                const MAX_HEIGHT = 1080;
+                                let width = img.width;
+                                let height = img.height;
+
+                                if (width > height) {
+                                    if (width > MAX_WIDTH) {
+                                        height *= MAX_WIDTH / width;
+                                        width = MAX_WIDTH;
+                                    }
+                                } else {
+                                    if (height > MAX_HEIGHT) {
+                                        width *= MAX_HEIGHT / height;
+                                        height = MAX_HEIGHT;
+                                    }
+                                }
+
+                                canvas.width = width;
+                                canvas.height = height;
+                                const ctx = canvas.getContext("2d");
+                                if (!ctx) return reject(new Error("No canvas context"));
+                                ctx.drawImage(img, 0, 0, width, height);
+
+                                canvas.toBlob(async (blob) => {
+                                    if (blob) {
+                                        resolve(await blob.arrayBuffer());
+                                    } else {
+                                        resolve(await file.arrayBuffer()); // fallback
+                                    }
+                                }, "image/webp", 0.8);
+                            };
+                            img.onerror = () => resolve(file.arrayBuffer()); // fallback
+                            img.src = event.target?.result as string;
+                        };
+                        reader.onerror = () => resolve(file.arrayBuffer()); // fallback
+                        reader.readAsDataURL(file);
+                    });
+                };
+
+                const arrayBuffer = await compressImage(file);
+                const configDir = this.app.vault.configDir;
+                const wallpaperDir = `${configDir}/plugins/enhanced-hometab/wallpapers`;
+                
+                // Ensure folder exists
+                if (!(await this.app.vault.adapter.exists(wallpaperDir))) {
+                    await this.app.vault.adapter.mkdir(wallpaperDir);
+                }
+
+                const fileName = `wallpaper_${Date.now()}.webp`;
+                const filePath = `${wallpaperDir}/${fileName}`;
+                
+                // Save binary file locally
+                await this.app.vault.adapter.writeBinary(filePath, arrayBuffer);
+
+                bgUrlInput.value = "";
+                addWallpaperToHistory("local:" + filePath);
+            }
+        });
+
+        // Fit setting
+        const fitWrapper = dropdownEl.createDiv({ cls: "bionic-settings-dropdown-wrapper" });
+        fitWrapper.createSpan({ text: "Fit:", cls: "bionic-settings-label" });
+        const fitSelect = fitWrapper.createEl("select", { cls: "bionic-settings-select" });
+        fitSelect.createEl("option", { value: "cover", text: "Cover" });
+        fitSelect.createEl("option", { value: "contain", text: "Contain" });
+        fitSelect.value = this.settingsManager.settings.wallpaperFit || "cover";
+
+        fitSelect.addEventListener("change", async () => {
+            this.settingsManager.settings.wallpaperFit = fitSelect.value;
             await this.settingsManager.saveSettings();
             (this.app.workspace as any).trigger("enhanced-hometab:settings-updated");
         });
 
+        // Opacity setting
         const bgOpacityWrapper = dropdownEl.createDiv({ cls: "bionic-settings-slider-wrapper" });
         bgOpacityWrapper.createSpan({ text: "Opacity:", cls: "bionic-settings-label" });
         const bgOpacityInput = bgOpacityWrapper.createEl("input", { 
@@ -266,6 +414,10 @@ export class DashboardEngine extends Component {
             await this.settingsManager.saveSettings();
             (this.app.workspace as any).trigger("enhanced-hometab:settings-updated");
         });
+
+        // Gallery container
+        const galleryContainer = dropdownEl.createDiv({ cls: "bionic-wallpaper-gallery" });
+        this.renderWallpaperGallery(galleryContainer, bgUrlInput);
 
         // --- Glassmorphism Toggle ---
         const glassItemEl = dropdownEl.createDiv({ cls: "bionic-quick-settings-item" });
@@ -315,14 +467,68 @@ export class DashboardEngine extends Component {
         });
 
         settingsBtnEl.addEventListener("click", (e) => {
+            e.preventDefault();
             e.stopPropagation();
-            dropdownEl.toggleClass("hidden", !dropdownEl.hasClass("hidden"));
+            dropdownEl.classList.toggle("hidden");
         });
 
-        document.addEventListener("click", (e) => {
-            if (!dropdownEl.contains(e.target as Node) && !settingsBtnEl.contains(e.target as Node)) {
-                dropdownEl.addClass("hidden");
+        if (this.documentClickHandler) {
+            document.removeEventListener("click", this.documentClickHandler);
+        }
+
+        this.documentClickHandler = (e: MouseEvent) => {
+            const target = e.target as Node;
+            if (dropdownEl && settingsBtnEl) {
+                if (!dropdownEl.contains(target) && !settingsBtnEl.contains(target)) {
+                    dropdownEl.classList.add("hidden");
+                }
             }
+        };
+        
+        document.addEventListener("click", this.documentClickHandler);
+    }
+
+    private renderWallpaperGallery(container: HTMLElement, urlInput: HTMLInputElement) {
+        container.empty();
+        const wallpapers = this.settingsManager.settings.recentWallpapers || [];
+        if (wallpapers.length === 0) return;
+
+        wallpapers.forEach((url) => {
+            const thumb = container.createDiv({ cls: "bionic-wallpaper-thumbnail" });
+            if (url === this.settingsManager.settings.backgroundImage) {
+                thumb.addClass("active");
+            }
+            
+            const displayUrl = this.resolveWallpaperUrl(url);
+            thumb.style.backgroundImage = `url("${displayUrl}")`;
+
+            thumb.addEventListener("click", async () => {
+                this.settingsManager.settings.backgroundImage = url;
+                // Move to front
+                const settings = this.settingsManager.settings;
+                settings.recentWallpapers = settings.recentWallpapers.filter(w => w !== url);
+                settings.recentWallpapers.unshift(url);
+                urlInput.value = url.startsWith("data:") ? "" : url;
+                
+                await this.settingsManager.saveSettings();
+                (this.app.workspace as any).trigger("enhanced-hometab:settings-updated");
+                this.renderWallpaperGallery(container, urlInput);
+            });
+
+            const deleteBtn = thumb.createDiv({ cls: "bionic-wallpaper-delete-btn" });
+            setIcon(deleteBtn, "x");
+            deleteBtn.addEventListener("click", async (e) => {
+                e.stopPropagation();
+                const settings = this.settingsManager.settings;
+                settings.recentWallpapers = settings.recentWallpapers.filter(w => w !== url);
+                if (settings.backgroundImage === url) {
+                    settings.backgroundImage = "";
+                    urlInput.value = "";
+                }
+                await this.settingsManager.saveSettings();
+                (this.app.workspace as any).trigger("enhanced-hometab:settings-updated");
+                this.renderWallpaperGallery(container, urlInput);
+            });
         });
     }
 }

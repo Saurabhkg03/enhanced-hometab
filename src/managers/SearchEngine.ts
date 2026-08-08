@@ -28,10 +28,12 @@ export class SearchEngine {
 
         // 1. Files & Folders
         const allFiles = this.app.vault.getAllLoadedFiles();
+        let lastYield = performance.now();
         for (let i = 0; i < allFiles.length; i++) {
             const fileOrFolder = allFiles[i];
-            if (i > 0 && i % 100 === 0) {
+            if (performance.now() - lastYield > 12) {
                 await yieldToMain();
+                lastYield = performance.now();
             }
 
             if (fileOrFolder instanceof TFolder) {

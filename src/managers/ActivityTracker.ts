@@ -99,7 +99,7 @@ export class ActivityTracker extends Component {
         this.debounceTimer = window.setTimeout(async () => {
             // Update workspace session state right before we save
             this.trackWorkspaceSession();
-            await this.settingsManager.saveSettings();
+            await this.settingsManager.saveSettings(true);
             // Intentionally omitting the trigger for "enhanced-hometab:settings-updated"
             // so we don't force-reload the active Hometab view on every file open/edit.
         }, 3000);

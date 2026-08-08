@@ -11,7 +11,9 @@ export default class EnhancedHometabPlugin extends Plugin {
 
 	async onload() {
 		this.settingsManager = new SettingsManager(this);
-		await this.settingsManager.loadSettings();
+		this.settingsManager.loadPromise = this.settingsManager.loadSettings();
+		await this.settingsManager.loadPromise; // Block onload until settings are loaded to prevent race conditions
+		
 		console.log('Enhanced Hometab Plugin loaded');
 
 		this.activityTracker = new ActivityTracker(this.app, this.settingsManager);

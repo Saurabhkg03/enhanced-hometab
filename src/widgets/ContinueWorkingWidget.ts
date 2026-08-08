@@ -122,11 +122,15 @@ export class ContinueWorkingWidget extends BaseWidget {
         if (data.lastWorkspace && data.lastWorkspace.tabsCount > 1) {
             renderCard("Previous Session", "layout", data.lastWorkspace, async () => {
                 const tabs = data.lastWorkspace!.tabs;
+                let isFirst = true;
                 for (const tab of tabs) {
                     const file = this.app.vault.getAbstractFileByPath(tab.path);
                     if (file instanceof TFile) {
-                        const leaf = this.app.workspace.getLeaf('tab');
+                        const leaf = isFirst 
+                            ? this.app.workspace.getLeaf(false) 
+                            : this.app.workspace.getLeaf('tab');
                         await leaf.openFile(file);
+                        isFirst = false;
                     }
                 }
             });

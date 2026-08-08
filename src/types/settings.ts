@@ -39,6 +39,8 @@ export interface EnhancedHometabSettings {
     recentSearches: string[];
     pinnedSearches: string[];
     continueWorkingData?: ContinueWorkingHistory;
+    recentWallpapers: string[];
+    wallpaperFit: string;
 }
 
 export const DEFAULT_SETTINGS: EnhancedHometabSettings = {
@@ -77,5 +79,7 @@ export const DEFAULT_SETTINGS: EnhancedHometabSettings = {
     enableGlassmorphism: false,
     recentSearches: [],
     pinnedSearches: [],
-    continueWorkingData: {}
+    continueWorkingData: {},
+    recentWallpapers: [],
+    wallpaperFit: "cover"
 };

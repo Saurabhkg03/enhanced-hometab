@@ -522,7 +522,7 @@ body.is-mobile .bionic-dashboard-content {
 }
 /* Quick Actions override */
 .bionic-widget.bionic-widget-quick-actions {
-    flex: 1 1 100%;
+    grid-column: 1 / -1;
     background: transparent;
     border: none;
     padding: 0;
@@ -641,8 +641,8 @@ body.is-mobile .bionic-dashboard-content {
 
 /* Widgets Grid */
 .bionic-widgets-grid {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 24px;
     width: 100%;
 }
@@ -659,7 +659,6 @@ body.is-mobile .bionic-dashboard-content {
 }
 
 .bionic-widget {
-    flex: 1 1 320px;
     background-color: var(--background-primary);
     border: 1px solid var(--background-modifier-border);
     border-radius: 16px;
@@ -669,12 +668,47 @@ body.is-mobile .bionic-dashboard-content {
     gap: 20px;
     opacity: 0;
     animation: fadeSlideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
 .bionic-widget:hover {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+/* Drag and Drop Smooth Animation Styles */
+body.bionic-is-dragging * {
+    user-select: none !important;
+}
+
+.bionic-widget-chosen {
+    opacity: 0.9 !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12) !important;
+}
+
+.bionic-widget-ghost {
+    opacity: 0.25 !important;
+    background-color: var(--background-secondary) !important;
+    border: 2px dashed var(--interactive-accent) !important;
+    box-shadow: none !important;
+    animation: none !important;
+}
+
+.bionic-widget-drag,
+.bionic-widget-fallback {
+    opacity: 0.95 !important;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.2) !important;
+    border-color: var(--interactive-accent) !important;
+    cursor: grabbing !important;
+    z-index: 9999 !important;
+    animation: none !important;
+    transform: scale(1.02) !important;
+    pointer-events: none !important;
+}
+
+.bionic-is-dragging .bionic-widget {
+    animation: none !important;
+    opacity: 1 !important;
 }
 
 .bionic-widget-header {
@@ -1157,8 +1191,8 @@ body.is-mobile .bionic-dashboard-content {
     position: absolute;
     top: 24px;
     right: 48px;
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1167,6 +1201,14 @@ body.is-mobile .bionic-dashboard-content {
     cursor: pointer;
     transition: all 0.2s ease;
     z-index: 1000;
+    background: transparent;
+    border: none;
+    padding: 0;
+    box-shadow: none;
+}
+
+.bionic-quick-settings-btn svg {
+    pointer-events: none;
 }
 
 .bionic-quick-settings-btn:hover {
@@ -1178,11 +1220,11 @@ body.is-mobile .bionic-dashboard-content {
     position: absolute;
     top: 68px;
     right: 48px;
-    width: 260px;
+    width: 320px;
     background-color: var(--background-primary);
     border: 1px solid var(--background-modifier-border);
     border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
     z-index: 1000;
     overflow: hidden;
 }
@@ -1192,13 +1234,12 @@ body.is-mobile .bionic-dashboard-content {
 }
 
 .bionic-quick-settings-header {
-    padding: 16px;
-    font-size: 0.9em;
-    font-weight: 600;
+    padding: 20px 16px 12px 16px;
+    font-size: 0.8em;
+    font-weight: 700;
     color: var(--text-muted);
-    border-bottom: 1px solid var(--background-modifier-border);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.1em;
 }
 
 .bionic-settings-divider {
@@ -1242,18 +1283,23 @@ body.is-mobile .bionic-dashboard-content {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 16px;
+    padding: 10px 16px;
     font-size: 0.95em;
     color: var(--text-normal);
-    border-bottom: 1px solid var(--background-modifier-border-hover);
+    border-bottom: 1px solid transparent;
 }
 
 .bionic-quick-settings-item:last-child {
     border-bottom: none;
+    margin-bottom: 8px;
 }
 
 .bionic-quick-settings-item:hover {
     background-color: var(--background-modifier-hover);
+    border-radius: 8px;
+    margin: 0 8px;
+    padding: 10px 8px;
+    width: calc(100% - 16px);
 }
 
 .bionic-toggle-checkbox {
@@ -1388,7 +1434,6 @@ body.theme-light .bionic-glass-mode .bionic-quick-action-btn:hover {
     display: flex;
     flex-direction: column;
     gap: 16px;
-    grid-column: 1 / -1; /* spans full width */
 }
 
 .bionic-continue-working-content {
@@ -1511,3 +1556,153 @@ body.theme-light .bionic-glass-mode .bionic-quick-action-btn:hover {
     text-overflow: ellipsis;
 }
 
+/* Wallpaper Module */
+.bionic-wallpaper-input-wrapper {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.bionic-wallpaper-input-wrapper .bionic-settings-text-input {
+    flex: 1;
+}
+
+.bionic-wallpaper-set-btn,
+.bionic-wallpaper-local-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    background-color: var(--background-secondary);
+    border: 1px solid var(--background-modifier-border);
+    color: var(--text-normal);
+    cursor: pointer;
+    font-size: 0.9em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+.bionic-wallpaper-local-btn {
+    padding: 6px;
+}
+.bionic-wallpaper-set-btn:hover,
+.bionic-wallpaper-local-btn:hover {
+    background-color: var(--background-modifier-hover);
+    border-color: var(--interactive-accent);
+}
+.bionic-wallpaper-file-input {
+    display: none;
+}
+.bionic-wallpaper-gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+    margin-bottom: 16px;
+    padding: 0 16px;
+}
+.bionic-wallpaper-thumbnail {
+    aspect-ratio: 16 / 9;
+    background-size: cover;
+    background-position: center;
+    border-radius: 8px;
+    cursor: pointer;
+    position: relative;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+.bionic-wallpaper-thumbnail:hover {
+    transform: scale(1.05);
+    z-index: 2;
+}
+.bionic-wallpaper-thumbnail.active {
+    border-color: var(--interactive-accent);
+}
+.bionic-wallpaper-delete-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+.bionic-wallpaper-thumbnail:hover .bionic-wallpaper-delete-btn {
+    opacity: 1;
+}
+.bionic-wallpaper-delete-btn:hover {
+    background: rgba(255, 60, 60, 0.9);
+}
+.bionic-wallpaper-delete-btn svg {
+    width: 12px;
+    height: 12px;
+}
+.bionic-settings-dropdown-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 8px 0;
+    padding: 0 16px;
+}
+.bionic-settings-select {
+    background-color: var(--background-secondary);
+    border: 1px solid var(--background-modifier-border);
+    color: var(--text-normal);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 0.9em;
+}
+
+/* --- Tasks Widget --- */
+.bionic-tasks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+}
+.bionic-task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    background: var(--background-secondary);
+    border-radius: var(--radius-m);
+    transition: background 0.15s ease;
+}
+.bionic-task-item:hover {
+    background: var(--background-secondary-alt);
+}
+.bionic-task-checkbox {
+    margin-top: 2px;
+    cursor: pointer;
+}
+.bionic-task-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    cursor: pointer;
+}
+.bionic-task-title {
+    color: var(--text-normal);
+    font-size: 14px;
+    line-height: 1.4;
+    transition: all 0.2s ease;
+}
+.bionic-task-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+.bionic-task-meta-icon {
+    display: flex;
+    align-items: center;
+    opacity: 0.7;
+}

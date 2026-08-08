@@ -1,5 +1,5 @@
 import { BaseWidget } from "./BaseWidget";
-import { TFile, setIcon } from "obsidian";
+import { TFile, setIcon, moment } from "obsidian";
 import { yieldToMain } from "../utils/performance";
 
 interface Task {
@@ -24,7 +24,7 @@ export class DailyNoteWidget extends BaseWidget {
     }
 
     private async openOrCreateTaskNote(): Promise<void> {
-        const dateStr = new Date().toISOString().split('T')[0];
+        const dateStr = moment().format("YYYY-MM-DD");
         
         // Check if today's note or task note exists
         const files = this.app.vault.getMarkdownFiles();
@@ -75,7 +75,7 @@ export class DailyNoteWidget extends BaseWidget {
         subHeader.style.cursor = "pointer";
         subHeader.title = "Open today's task note";
         
-        const dateStr = new Date().toISOString().split('T')[0];
+        const dateStr = moment().format("YYYY-MM-DD");
         subHeader.createSpan({ text: dateStr, cls: "bionic-daily-note-date" });
         const iconEl = subHeader.createSpan({ cls: "bionic-daily-note-icon" });
         setIcon(iconEl, "calendar");
@@ -115,7 +115,7 @@ export class DailyNoteWidget extends BaseWidget {
                 checkboxEl.addEventListener("change", async (e) => {
                     const target = e.target as HTMLInputElement;
                     target.disabled = true;
-                    await this.toggleTaskInFile(task.file, task.line);
+                    await this.toggleTaskInFile(task.file, task.text, task.line);
                     itemEl.style.opacity = "0.5";
                     itemEl.style.textDecoration = "line-through";
                     setTimeout(() => {
@@ -176,12 +176,33 @@ export class DailyNoteWidget extends BaseWidget {
         return tasks;
     }
 
-    private async toggleTaskInFile(file: TFile, lineIndex: number) {
+    private async toggleTaskInFile(file: TFile, taskText: string, preferredLineIndex?: number) {
         const content = await this.app.vault.read(file);
         const lines = content.split('\n');
-        
-        if (lines[lineIndex]) {
-            lines[lineIndex] = lines[lineIndex].replace(/\[ \]/, "[x]");
+        let modified = false;
+
+        // Try preferred line index first if it matches
+        if (preferredLineIndex !== undefined && preferredLineIndex < lines.length) {
+            const line = lines[preferredLineIndex];
+            if (line.includes('[ ]') && line.includes(taskText)) {
+                lines[preferredLineIndex] = line.replace(/\[ \]/, "[x]");
+                modified = true;
+            }
+        }
+
+        // If preferred line index was inaccurate (due to line shifts), search entire file
+        if (!modified) {
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                if (line.includes('[ ]') && line.includes(taskText)) {
+                    lines[i] = line.replace(/\[ \]/, "[x]");
+                    modified = true;
+                    break;
+                }
+            }
+        }
+
+        if (modified) {
             await this.app.vault.modify(file, lines.join('\n'));
         }
     }

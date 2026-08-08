@@ -25,15 +25,17 @@ export class HomeView extends ItemView {
     }
 
     async onOpen() {
-        const container = this.containerEl.children[1] as HTMLElement; // .view-content
+        const container = this.contentEl; // .view-content
         container.empty();
         
+        await this.plugin.settingsManager.loadPromise;
+
         this.dashboardEngine = new DashboardEngine(this.app, container, this.plugin.settingsManager);
         this.addChild(this.dashboardEngine); 
     }
 
     async onClose() {
-        const container = this.containerEl.children[1] as HTMLElement;
+        const container = this.contentEl;
         container.empty();
     }
 }

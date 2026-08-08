@@ -4,6 +4,7 @@ import { EnhancedHometabSettings, DEFAULT_SETTINGS } from "../types/settings";
 export class SettingsManager {
     private plugin: Plugin;
     public settings: EnhancedHometabSettings;
+    public loadPromise: Promise<void>;
 
     constructor(plugin: Plugin) {
         this.plugin = plugin;
@@ -19,9 +20,11 @@ export class SettingsManager {
         }
     }
 
-    async saveSettings() {
+    async saveSettings(silent = false) {
         await this.plugin.saveData(this.settings);
-        (this.plugin.app.workspace as any).trigger("enhanced-hometab:settings-updated");
+        if (!silent) {
+            (this.plugin.app.workspace as any).trigger("enhanced-hometab:settings-updated");
+        }
     }
 
     get(key: keyof EnhancedHometabSettings) {

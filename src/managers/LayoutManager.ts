@@ -26,14 +26,20 @@ export class LayoutManager extends Component {
         containerEl.addClass("bionic-sortable-container");
 
         this.sortableInstance = Sortable.create(containerEl, {
-            animation: 250, // Smooth animation (ms)
-            easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
-            handle: ".bionic-widget-header", // Drag handle
+            animation: 200,
+            easing: "cubic-bezier(0.2, 0, 0, 1)",
+            handle: ".bionic-widget-header",
             ghostClass: "bionic-widget-ghost",
+            chosenClass: "bionic-widget-chosen",
             dragClass: "bionic-widget-drag",
-            forceFallback: true, // Better compatibility across environments
+            fallbackClass: "bionic-widget-fallback",
+            forceFallback: true,
             fallbackTolerance: 3,
+            onStart: () => {
+                document.body.addClass("bionic-is-dragging");
+            },
             onEnd: async (evt) => {
+                document.body.removeClass("bionic-is-dragging");
                 const newOrder: string[] = [];
                 containerEl.querySelectorAll('.bionic-widget').forEach(w => {
                     const id = Array.from(w.classList)
@@ -45,7 +51,7 @@ export class LayoutManager extends Component {
                 });
                 
                 this.settingsManager.settings.widgetOrder = newOrder;
-                await this.settingsManager.saveSettings();
+                await this.settingsManager.saveSettings(true);
             }
         });
         

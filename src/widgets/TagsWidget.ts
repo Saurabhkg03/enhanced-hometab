@@ -1,5 +1,5 @@
 import { BaseWidget } from "./BaseWidget";
-import { setIcon } from "obsidian";
+import { Notice, setIcon } from "obsidian";
 
 const TAG_COLORS = [
     { bg: "rgba(139, 92, 246, 0.12)", border: "rgba(139, 92, 246, 0.3)", text: "#a78bfa" }, // Purple
@@ -81,8 +81,10 @@ export class TagsWidget extends BaseWidget {
 
             tagEl.addEventListener("click", () => {
                 const searchPlugin = (this.app as any).internalPlugins?.getPluginById("global-search");
-                if (searchPlugin?.instance) {
+                if (searchPlugin?.enabled && searchPlugin?.instance) {
                     searchPlugin.instance.openGlobalSearch(`tag:${tag}`);
+                } else {
+                    new Notice("The core Search plugin is currently disabled.");
                 }
             });
         }

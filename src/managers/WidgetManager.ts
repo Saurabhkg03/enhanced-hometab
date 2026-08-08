@@ -30,16 +30,35 @@ export class WidgetManager extends Component {
         });
 
         sortedWidgets.forEach((widget, index) => {
-            widget.mount(this.app, containerEl);
-            if (widget.containerEl) {
-                widget.containerEl.style.animationDelay = `${index * 50}ms`;
+            try {
+                widget.mount(this.app, containerEl);
+                if (widget.containerEl) {
+                    widget.containerEl.style.animationDelay = `${index * 50}ms`;
+                }
+            } catch (err) {
+                console.error(`Enhanced Hometab: Failed to mount widget ${widget.config.id}`, err);
             }
         });
     }
     
     public refreshAll() {
         for (const widget of this.widgets.values()) {
-            widget.refresh();
+            try {
+                widget.refresh();
+            } catch (err) {
+                console.error(`Enhanced Hometab: Failed to refresh widget ${widget.config.id}`, err);
+            }
+        }
+    }
+
+    public refreshWidget(id: string) {
+        const widget = this.widgets.get(id);
+        if (widget) {
+            try {
+                widget.refresh();
+            } catch (err) {
+                console.error(`Enhanced Hometab: Failed to refresh widget ${id}`, err);
+            }
         }
     }
 

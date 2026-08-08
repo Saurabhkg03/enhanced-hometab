@@ -62,7 +62,6 @@ export class QuickActionsWidget extends BaseWidget {
                         .onClick(async () => {
                             item.hidden = !item.hidden;
                             await plugin.settingsManager.saveSettings();
-                            (this.app as any).workspace.trigger("enhanced-hometab:settings-updated");
                         });
                 });
             }
@@ -320,11 +319,17 @@ export class QuickActionsWidget extends BaseWidget {
                     if (fromIndex !== -1 && toIndex !== -1) {
                         const [movedItem] = actions.splice(fromIndex, 1);
                         actions.splice(toIndex, 0, movedItem);
-                        await plugin.settingsManager.saveSettings();
-                        (this.app as any).workspace.trigger("enhanced-hometab:settings-updated");
+                        await plugin.settingsManager.saveSettings(true);
+                        this.refresh();
                     }
                 }
             });
         }
+    }
+
+    public refresh(): void {
+        const grid = this.containerEl.querySelector(".bionic-quick-actions-grid");
+        if (grid) grid.remove();
+        this.render();
     }
 }

@@ -64,15 +64,33 @@ var WidgetManager = class extends import_obsidian.Component {
       return indexA - indexB;
     });
     sortedWidgets.forEach((widget, index2) => {
-      widget.mount(this.app, containerEl);
-      if (widget.containerEl) {
-        widget.containerEl.style.animationDelay = `${index2 * 50}ms`;
+      try {
+        widget.mount(this.app, containerEl);
+        if (widget.containerEl) {
+          widget.containerEl.style.animationDelay = `${index2 * 50}ms`;
+        }
+      } catch (err) {
+        console.error(`Enhanced Hometab: Failed to mount widget ${widget.config.id}`, err);
       }
     });
   }
   refreshAll() {
     for (const widget of this.widgets.values()) {
-      widget.refresh();
+      try {
+        widget.refresh();
+      } catch (err) {
+        console.error(`Enhanced Hometab: Failed to refresh widget ${widget.config.id}`, err);
+      }
+    }
+  }
+  refreshWidget(id) {
+    const widget = this.widgets.get(id);
+    if (widget) {
+      try {
+        widget.refresh();
+      } catch (err) {
+        console.error(`Enhanced Hometab: Failed to refresh widget ${id}`, err);
+      }
     }
   }
   onunload() {
@@ -112,10 +130,12 @@ var SearchEngine = class {
     const fuzzySearch = (0, import_obsidian2.prepareFuzzySearch)(query);
     const results = [];
     const allFiles = this.app.vault.getAllLoadedFiles();
+    let lastYield = performance.now();
     for (let i = 0; i < allFiles.length; i++) {
       const fileOrFolder = allFiles[i];
-      if (i > 0 && i % 100 === 0) {
+      if (performance.now() - lastYield > 12) {
         await yieldToMain();
+        lastYield = performance.now();
       }
       if (fileOrFolder instanceof import_obsidian2.TFolder) {
         if (fileOrFolder.path === "/")
@@ -276,12 +296,15 @@ var SearchBar = class {
     this.currentSearchId = 0;
     this.searchResults = [];
     this.selectedIndex = -1;
+    this.documentClickListener = null;
+    this.windowKeydownListener = null;
     this.app = app;
     this.containerEl = containerEl;
     this.settingsManager = settingsManager;
     this.searchEngine = new SearchEngine(this.app);
   }
   render() {
+    this.destroy();
     this.containerEl.empty();
     this.containerEl.addClass("bionic-search-bar-container");
     const wrapperEl = this.containerEl.createDiv({ cls: "bionic-search-wrapper" });
@@ -304,32 +327,47 @@ var SearchBar = class {
         this.resultsContainerEl.removeClass("hidden");
       }
     });
-    document.addEventListener("click", (e) => {
+    this.documentClickListener = (e) => {
       if (!this.containerEl.contains(e.target)) {
         this.hideResults();
       }
-    });
-    window.addEventListener(
-      "keydown",
-      (e) => {
-        var _a;
-        const isK = ((_a = e.key) == null ? void 0 : _a.toLowerCase()) === "k" || e.code === "KeyK";
-        if ((e.ctrlKey || e.metaKey) && isK) {
-          if (document.body.contains(this.containerEl)) {
-            e.preventDefault();
-            e.stopPropagation();
-            this.inputEl.focus();
-            this.inputEl.select();
-            if (this.inputEl.value.trim().length > 0) {
-              this.onInput();
-            } else {
-              this.showEmptyState();
-            }
+    };
+    document.addEventListener("click", this.documentClickListener);
+    this.windowKeydownListener = (e) => {
+      var _a;
+      const isK = ((_a = e.key) == null ? void 0 : _a.toLowerCase()) === "k" || e.code === "KeyK";
+      if ((e.ctrlKey || e.metaKey) && isK) {
+        if (document.body.contains(this.containerEl)) {
+          e.preventDefault();
+          e.stopPropagation();
+          this.inputEl.focus();
+          this.inputEl.select();
+          if (this.inputEl.value.trim().length > 0) {
+            this.onInput();
+          } else {
+            this.showEmptyState();
           }
         }
-      },
-      true
-    );
+      }
+    };
+    window.addEventListener("keydown", this.windowKeydownListener, true);
+  }
+  destroy() {
+    if (this.debounceTimer) {
+      window.clearTimeout(this.debounceTimer);
+      this.debounceTimer = null;
+    }
+    if (this.documentClickListener) {
+      document.removeEventListener("click", this.documentClickListener);
+      this.documentClickListener = null;
+    }
+    if (this.windowKeydownListener) {
+      window.removeEventListener("keydown", this.windowKeydownListener, true);
+      this.windowKeydownListener = null;
+    }
+  }
+  getNavigableItems() {
+    return Array.from(this.resultsContainerEl.querySelectorAll(".bionic-search-result-item, .bionic-search-history-item"));
   }
   showEmptyState() {
     this.resultsContainerEl.empty();
@@ -371,6 +409,13 @@ var SearchBar = class {
           });
         });
       }
+      const items = this.getNavigableItems();
+      items.forEach((item, index2) => {
+        item.addEventListener("mouseenter", () => {
+          this.selectedIndex = index2;
+          this.updateSelection();
+        });
+      });
     }
     this.resultsContainerEl.removeClass("hidden");
   }
@@ -378,7 +423,7 @@ var SearchBar = class {
     let recent = this.settingsManager.settings.recentSearches || [];
     recent = recent.filter((r) => r !== query);
     this.settingsManager.settings.recentSearches = recent;
-    this.settingsManager.saveSettings();
+    this.settingsManager.saveSettings(true);
     this.showEmptyState();
   }
   addToHistory(query) {
@@ -388,7 +433,7 @@ var SearchBar = class {
     if (recent.length > 10)
       recent = recent.slice(0, 10);
     this.settingsManager.settings.recentSearches = recent;
-    this.settingsManager.saveSettings();
+    this.settingsManager.saveSettings(true);
   }
   onInput() {
     if (this.debounceTimer) {
@@ -410,32 +455,27 @@ var SearchBar = class {
   onKeyDown(e) {
     if (this.resultsContainerEl.hasClass("hidden"))
       return;
+    const items = this.getNavigableItems();
+    if (items.length === 0)
+      return;
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      if (this.searchResults.length > 0) {
-        this.selectedIndex = (this.selectedIndex + 1) % this.searchResults.length;
-        this.updateSelection();
-      }
+      this.selectedIndex = (this.selectedIndex + 1) % items.length;
+      this.updateSelection();
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      if (this.searchResults.length > 0) {
-        this.selectedIndex = (this.selectedIndex - 1 + this.searchResults.length) % this.searchResults.length;
-        this.updateSelection();
+      if (this.selectedIndex <= 0) {
+        this.selectedIndex = items.length - 1;
+      } else {
+        this.selectedIndex = this.selectedIndex - 1;
       }
+      this.updateSelection();
     } else if (e.key === "Enter") {
       e.preventDefault();
-      if (this.selectedIndex >= 0 && this.selectedIndex < this.searchResults.length) {
-        this.addToHistory(this.inputEl.value.trim());
-        this.searchResults[this.selectedIndex].action();
-        this.hideResults();
-        this.inputEl.value = "";
-        this.inputEl.blur();
-      } else if (this.searchResults.length > 0) {
-        this.addToHistory(this.inputEl.value.trim());
-        this.searchResults[0].action();
-        this.hideResults();
-        this.inputEl.value = "";
-        this.inputEl.blur();
+      if (this.selectedIndex >= 0 && this.selectedIndex < items.length) {
+        items[this.selectedIndex].click();
+      } else if (items.length > 0) {
+        items[0].click();
       }
     } else if (e.key === "Escape") {
       this.hideResults();
@@ -443,7 +483,7 @@ var SearchBar = class {
     }
   }
   updateSelection() {
-    const items = this.resultsContainerEl.querySelectorAll(".bionic-search-result-item");
+    const items = this.getNavigableItems();
     items.forEach((item, index2) => {
       if (index2 === this.selectedIndex) {
         item.addClass("is-selected");
@@ -780,7 +820,6 @@ var QuickActionsWidget = class extends BaseWidget {
           menuItem.setTitle(label).setChecked(isChecked).onClick(async () => {
             item.hidden = !item.hidden;
             await plugin.settingsManager.saveSettings();
-            this.app.workspace.trigger("enhanced-hometab:settings-updated");
           });
         });
       }
@@ -1073,12 +1112,18 @@ var QuickActionsWidget = class extends BaseWidget {
           if (fromIndex !== -1 && toIndex !== -1) {
             const [movedItem] = actions.splice(fromIndex, 1);
             actions.splice(toIndex, 0, movedItem);
-            await plugin.settingsManager.saveSettings();
-            this.app.workspace.trigger("enhanced-hometab:settings-updated");
+            await plugin.settingsManager.saveSettings(true);
+            this.refresh();
           }
         }
       });
     }
+  }
+  refresh() {
+    const grid = this.containerEl.querySelector(".bionic-quick-actions-grid");
+    if (grid)
+      grid.remove();
+    this.render();
   }
 };
 
@@ -1237,7 +1282,7 @@ var DailyNoteWidget = class extends BaseWidget {
   }
   async openOrCreateTaskNote() {
     var _a;
-    const dateStr = (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
+    const dateStr = (0, import_obsidian10.moment)().format("YYYY-MM-DD");
     const files = this.app.vault.getMarkdownFiles();
     let targetFile = files.find((f) => f.basename === dateStr || f.basename.includes(dateStr));
     if (!targetFile) {
@@ -1281,7 +1326,7 @@ var DailyNoteWidget = class extends BaseWidget {
     const subHeader = this.containerEl.createDiv({ cls: "bionic-daily-note-subheader" });
     subHeader.style.cursor = "pointer";
     subHeader.title = "Open today's task note";
-    const dateStr = (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
+    const dateStr = (0, import_obsidian10.moment)().format("YYYY-MM-DD");
     subHeader.createSpan({ text: dateStr, cls: "bionic-daily-note-date" });
     const iconEl = subHeader.createSpan({ cls: "bionic-daily-note-icon" });
     (0, import_obsidian10.setIcon)(iconEl, "calendar");
@@ -1312,7 +1357,7 @@ var DailyNoteWidget = class extends BaseWidget {
         checkboxEl.addEventListener("change", async (e) => {
           const target = e.target;
           target.disabled = true;
-          await this.toggleTaskInFile(task.file, task.line);
+          await this.toggleTaskInFile(task.file, task.text, task.line);
           itemEl.style.opacity = "0.5";
           itemEl.style.textDecoration = "line-through";
           setTimeout(() => {
@@ -1364,11 +1409,28 @@ var DailyNoteWidget = class extends BaseWidget {
     }
     return tasks;
   }
-  async toggleTaskInFile(file, lineIndex) {
+  async toggleTaskInFile(file, taskText, preferredLineIndex) {
     const content = await this.app.vault.read(file);
     const lines = content.split("\n");
-    if (lines[lineIndex]) {
-      lines[lineIndex] = lines[lineIndex].replace(/\[ \]/, "[x]");
+    let modified = false;
+    if (preferredLineIndex !== void 0 && preferredLineIndex < lines.length) {
+      const line = lines[preferredLineIndex];
+      if (line.includes("[ ]") && line.includes(taskText)) {
+        lines[preferredLineIndex] = line.replace(/\[ \]/, "[x]");
+        modified = true;
+      }
+    }
+    if (!modified) {
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.includes("[ ]") && line.includes(taskText)) {
+          lines[i] = line.replace(/\[ \]/, "[x]");
+          modified = true;
+          break;
+        }
+      }
+    }
+    if (modified) {
       await this.app.vault.modify(file, lines.join("\n"));
     }
   }
@@ -1445,8 +1507,10 @@ var TagsWidget = class extends BaseWidget {
       tagEl.addEventListener("click", () => {
         var _a;
         const searchPlugin = (_a = this.app.internalPlugins) == null ? void 0 : _a.getPluginById("global-search");
-        if (searchPlugin == null ? void 0 : searchPlugin.instance) {
+        if ((searchPlugin == null ? void 0 : searchPlugin.enabled) && (searchPlugin == null ? void 0 : searchPlugin.instance)) {
           searchPlugin.instance.openGlobalSearch(`tag:${tag}`);
+        } else {
+          new import_obsidian11.Notice("The core Search plugin is currently disabled.");
         }
       });
     }
@@ -1634,11 +1698,13 @@ var ContinueWorkingWidget = class extends BaseWidget {
     if (data.lastWorkspace && data.lastWorkspace.tabsCount > 1) {
       renderCard("Previous Session", "layout", data.lastWorkspace, async () => {
         const tabs = data.lastWorkspace.tabs;
+        let isFirst = true;
         for (const tab of tabs) {
           const file = this.app.vault.getAbstractFileByPath(tab.path);
           if (file instanceof import_obsidian13.TFile) {
-            const leaf = this.app.workspace.getLeaf("tab");
+            const leaf = isFirst ? this.app.workspace.getLeaf(false) : this.app.workspace.getLeaf("tab");
             await leaf.openFile(file);
+            isFirst = false;
           }
         }
       });
@@ -3922,17 +3988,20 @@ var LayoutManager = class extends import_obsidian14.Component {
     }
     containerEl.addClass("bionic-sortable-container");
     this.sortableInstance = sortable_esm_default.create(containerEl, {
-      animation: 250,
-      // Smooth animation (ms)
-      easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+      animation: 200,
+      easing: "cubic-bezier(0.2, 0, 0, 1)",
       handle: ".bionic-widget-header",
-      // Drag handle
       ghostClass: "bionic-widget-ghost",
+      chosenClass: "bionic-widget-chosen",
       dragClass: "bionic-widget-drag",
+      fallbackClass: "bionic-widget-fallback",
       forceFallback: true,
-      // Better compatibility across environments
       fallbackTolerance: 3,
+      onStart: () => {
+        document.body.addClass("bionic-is-dragging");
+      },
       onEnd: async (evt) => {
+        document.body.removeClass("bionic-is-dragging");
         const newOrder = [];
         containerEl.querySelectorAll(".bionic-widget").forEach((w) => {
           var _a;
@@ -3942,7 +4011,7 @@ var LayoutManager = class extends import_obsidian14.Component {
           }
         });
         this.settingsManager.settings.widgetOrder = newOrder;
-        await this.settingsManager.saveSettings();
+        await this.settingsManager.saveSettings(true);
       }
     });
     const widgets = containerEl.querySelectorAll(".bionic-widget");
@@ -3968,6 +4037,7 @@ var DashboardEngine = class extends import_obsidian15.Component {
     this.bgEl = null;
     this.clockInterval = null;
     this.vaultTimer = null;
+    this.documentClickHandler = null;
     this.app = app;
     this.containerEl = containerEl;
     this.settingsManager = settingsManager;
@@ -4011,6 +4081,8 @@ var DashboardEngine = class extends import_obsidian15.Component {
   }
   registerVaultObservers() {
     const triggerWidgetRefresh = () => {
+      if (!this.containerEl.isShown())
+        return;
       if (this.vaultTimer)
         window.clearTimeout(this.vaultTimer);
       this.vaultTimer = window.setTimeout(() => {
@@ -4020,7 +4092,7 @@ var DashboardEngine = class extends import_obsidian15.Component {
         this.widgetManager.refreshWidget("backlinks");
         this.widgetManager.refreshWidget("tags");
         this.widgetManager.refreshWidget("pinned");
-      }, 150);
+      }, 500);
     };
     this.registerEvent(this.app.vault.on("modify", triggerWidgetRefresh));
     this.registerEvent(this.app.vault.on("create", triggerWidgetRefresh));
@@ -4029,13 +4101,24 @@ var DashboardEngine = class extends import_obsidian15.Component {
     this.registerEvent(this.app.metadataCache.on("changed", triggerWidgetRefresh));
     this.registerEvent(this.app.workspace.on("active-leaf-change", triggerWidgetRefresh));
   }
+  resolveWallpaperUrl(url) {
+    if (!url)
+      return "";
+    if (url.startsWith("local:")) {
+      const filePath = url.substring(6);
+      return this.app.vault.adapter.getResourcePath(filePath);
+    }
+    return url;
+  }
   handleSettingsUpdated() {
     this.containerEl.toggleClass("bionic-glass-mode", !!this.settingsManager.settings.enableGlassmorphism);
     if (this.bgEl) {
-      const bgUrl = this.settingsManager.settings.backgroundImage;
+      let bgUrl = this.settingsManager.settings.backgroundImage;
       if (bgUrl) {
+        bgUrl = this.resolveWallpaperUrl(bgUrl);
         this.bgEl.style.backgroundImage = `url("${bgUrl}")`;
         this.bgEl.style.opacity = this.settingsManager.settings.backgroundOpacity.toString();
+        this.bgEl.style.backgroundSize = this.settingsManager.settings.wallpaperFit || "cover";
       } else {
         this.bgEl.remove();
         this.bgEl = null;
@@ -4062,9 +4145,16 @@ var DashboardEngine = class extends import_obsidian15.Component {
       window.clearTimeout(this.vaultTimer);
       this.vaultTimer = null;
     }
+    if (this.searchBar) {
+      this.searchBar.destroy();
+    }
     this.containerEl.empty();
     if (this.settingsEventRef) {
       this.app.workspace.offref(this.settingsEventRef);
+    }
+    if (this.documentClickHandler) {
+      document.removeEventListener("click", this.documentClickHandler);
+      this.documentClickHandler = null;
     }
   }
   render() {
@@ -4088,12 +4178,14 @@ var DashboardEngine = class extends import_obsidian15.Component {
     this.layoutManager.bindDraggable(this.widgetsGridEl);
   }
   renderBackground() {
-    const bgUrl = this.settingsManager.settings.backgroundImage;
+    let bgUrl = this.settingsManager.settings.backgroundImage;
     if (!bgUrl)
       return;
+    bgUrl = this.resolveWallpaperUrl(bgUrl);
     this.bgEl = this.containerEl.createDiv({ cls: "bionic-dashboard-background" });
     this.bgEl.style.backgroundImage = `url("${bgUrl}")`;
     this.bgEl.style.opacity = this.settingsManager.settings.backgroundOpacity.toString();
+    this.bgEl.style.backgroundSize = this.settingsManager.settings.wallpaperFit || "cover";
   }
   renderHeader() {
     const greetingName = this.settingsManager.settings.greetingName || "Explorer";
@@ -4132,23 +4224,124 @@ var DashboardEngine = class extends import_obsidian15.Component {
     }
   }
   renderSearchArea() {
+    if (this.searchBar) {
+      this.searchBar.destroy();
+    }
     this.searchBar = new SearchBar(this.app, this.searchAreaEl, this.settingsManager);
     this.searchBar.render();
   }
   renderSettingsMenu() {
-    const settingsBtnEl = this.containerEl.createDiv({ cls: "bionic-quick-settings-btn" });
+    const settingsBtnEl = this.containerEl.createEl("button", { cls: "bionic-quick-settings-btn" });
     (0, import_obsidian15.setIcon)(settingsBtnEl, "more-horizontal");
     const dropdownEl = this.containerEl.createDiv({ cls: "bionic-quick-settings-dropdown hidden" });
-    dropdownEl.createEl("div", { cls: "bionic-quick-settings-header", text: "Background Image" });
-    const bgUrlWrapper = dropdownEl.createDiv({ cls: "bionic-settings-input-wrapper" });
+    dropdownEl.createEl("div", { cls: "bionic-quick-settings-header", text: "Wallpaper" });
+    const bgUrlWrapper = dropdownEl.createDiv({ cls: "bionic-settings-input-wrapper bionic-wallpaper-input-wrapper" });
     const bgUrlInput = bgUrlWrapper.createEl("input", {
       type: "text",
       placeholder: "Image URL...",
       value: this.settingsManager.settings.backgroundImage || "",
       cls: "bionic-settings-text-input"
     });
-    bgUrlInput.addEventListener("change", async () => {
-      this.settingsManager.settings.backgroundImage = bgUrlInput.value.trim();
+    const setBgBtn = bgUrlWrapper.createEl("button", { text: "Set", cls: "bionic-wallpaper-set-btn" });
+    const localPickerBtn = bgUrlWrapper.createEl("button", { cls: "bionic-wallpaper-local-btn", title: "Upload Local Image" });
+    (0, import_obsidian15.setIcon)(localPickerBtn, "image-plus");
+    const fileInput = bgUrlWrapper.createEl("input", {
+      type: "file",
+      attr: { accept: "image/*" },
+      cls: "bionic-wallpaper-file-input hidden"
+    });
+    localPickerBtn.addEventListener("click", () => fileInput.click());
+    const addWallpaperToHistory = async (url) => {
+      if (!url)
+        return;
+      const settings = this.settingsManager.settings;
+      settings.backgroundImage = url;
+      settings.recentWallpapers = settings.recentWallpapers.filter((w) => w !== url);
+      settings.recentWallpapers.unshift(url);
+      if (settings.recentWallpapers.length > 9) {
+        settings.recentWallpapers = settings.recentWallpapers.slice(0, 9);
+      }
+      await this.settingsManager.saveSettings();
+      this.app.workspace.trigger("enhanced-hometab:settings-updated");
+      this.renderWallpaperGallery(galleryContainer, bgUrlInput);
+    };
+    setBgBtn.addEventListener("click", () => {
+      addWallpaperToHistory(bgUrlInput.value.trim());
+    });
+    bgUrlInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        addWallpaperToHistory(bgUrlInput.value.trim());
+      }
+    });
+    fileInput.addEventListener("change", async (e) => {
+      const files = e.target.files;
+      if (files && files.length > 0) {
+        const file = files[0];
+        const compressImage = async (file2) => {
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              var _a;
+              const img = new Image();
+              img.onload = () => {
+                const canvas = document.createElement("canvas");
+                const MAX_WIDTH = 1920;
+                const MAX_HEIGHT = 1080;
+                let width = img.width;
+                let height = img.height;
+                if (width > height) {
+                  if (width > MAX_WIDTH) {
+                    height *= MAX_WIDTH / width;
+                    width = MAX_WIDTH;
+                  }
+                } else {
+                  if (height > MAX_HEIGHT) {
+                    width *= MAX_HEIGHT / height;
+                    height = MAX_HEIGHT;
+                  }
+                }
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext("2d");
+                if (!ctx)
+                  return reject(new Error("No canvas context"));
+                ctx.drawImage(img, 0, 0, width, height);
+                canvas.toBlob(async (blob) => {
+                  if (blob) {
+                    resolve(await blob.arrayBuffer());
+                  } else {
+                    resolve(await file2.arrayBuffer());
+                  }
+                }, "image/webp", 0.8);
+              };
+              img.onerror = () => resolve(file2.arrayBuffer());
+              img.src = (_a = event.target) == null ? void 0 : _a.result;
+            };
+            reader.onerror = () => resolve(file2.arrayBuffer());
+            reader.readAsDataURL(file2);
+          });
+        };
+        const arrayBuffer = await compressImage(file);
+        const configDir = this.app.vault.configDir;
+        const wallpaperDir = `${configDir}/plugins/enhanced-hometab/wallpapers`;
+        if (!await this.app.vault.adapter.exists(wallpaperDir)) {
+          await this.app.vault.adapter.mkdir(wallpaperDir);
+        }
+        const fileName = `wallpaper_${Date.now()}.webp`;
+        const filePath = `${wallpaperDir}/${fileName}`;
+        await this.app.vault.adapter.writeBinary(filePath, arrayBuffer);
+        bgUrlInput.value = "";
+        addWallpaperToHistory("local:" + filePath);
+      }
+    });
+    const fitWrapper = dropdownEl.createDiv({ cls: "bionic-settings-dropdown-wrapper" });
+    fitWrapper.createSpan({ text: "Fit:", cls: "bionic-settings-label" });
+    const fitSelect = fitWrapper.createEl("select", { cls: "bionic-settings-select" });
+    fitSelect.createEl("option", { value: "cover", text: "Cover" });
+    fitSelect.createEl("option", { value: "contain", text: "Contain" });
+    fitSelect.value = this.settingsManager.settings.wallpaperFit || "cover";
+    fitSelect.addEventListener("change", async () => {
+      this.settingsManager.settings.wallpaperFit = fitSelect.value;
       await this.settingsManager.saveSettings();
       this.app.workspace.trigger("enhanced-hometab:settings-updated");
     });
@@ -4165,6 +4358,8 @@ var DashboardEngine = class extends import_obsidian15.Component {
       await this.settingsManager.saveSettings();
       this.app.workspace.trigger("enhanced-hometab:settings-updated");
     });
+    const galleryContainer = dropdownEl.createDiv({ cls: "bionic-wallpaper-gallery" });
+    this.renderWallpaperGallery(galleryContainer, bgUrlInput);
     const glassItemEl = dropdownEl.createDiv({ cls: "bionic-quick-settings-item" });
     glassItemEl.createSpan({ text: "Glassmorphism UI" });
     const glassToggleWrapper = glassItemEl.createDiv({ cls: "bionic-toggle-wrapper" });
@@ -4203,13 +4398,59 @@ var DashboardEngine = class extends import_obsidian15.Component {
       });
     });
     settingsBtnEl.addEventListener("click", (e) => {
+      e.preventDefault();
       e.stopPropagation();
-      dropdownEl.toggleClass("hidden", !dropdownEl.hasClass("hidden"));
+      dropdownEl.classList.toggle("hidden");
     });
-    document.addEventListener("click", (e) => {
-      if (!dropdownEl.contains(e.target) && !settingsBtnEl.contains(e.target)) {
-        dropdownEl.addClass("hidden");
+    if (this.documentClickHandler) {
+      document.removeEventListener("click", this.documentClickHandler);
+    }
+    this.documentClickHandler = (e) => {
+      const target = e.target;
+      if (dropdownEl && settingsBtnEl) {
+        if (!dropdownEl.contains(target) && !settingsBtnEl.contains(target)) {
+          dropdownEl.classList.add("hidden");
+        }
       }
+    };
+    document.addEventListener("click", this.documentClickHandler);
+  }
+  renderWallpaperGallery(container, urlInput) {
+    container.empty();
+    const wallpapers = this.settingsManager.settings.recentWallpapers || [];
+    if (wallpapers.length === 0)
+      return;
+    wallpapers.forEach((url) => {
+      const thumb = container.createDiv({ cls: "bionic-wallpaper-thumbnail" });
+      if (url === this.settingsManager.settings.backgroundImage) {
+        thumb.addClass("active");
+      }
+      const displayUrl = this.resolveWallpaperUrl(url);
+      thumb.style.backgroundImage = `url("${displayUrl}")`;
+      thumb.addEventListener("click", async () => {
+        this.settingsManager.settings.backgroundImage = url;
+        const settings = this.settingsManager.settings;
+        settings.recentWallpapers = settings.recentWallpapers.filter((w) => w !== url);
+        settings.recentWallpapers.unshift(url);
+        urlInput.value = url.startsWith("data:") ? "" : url;
+        await this.settingsManager.saveSettings();
+        this.app.workspace.trigger("enhanced-hometab:settings-updated");
+        this.renderWallpaperGallery(container, urlInput);
+      });
+      const deleteBtn = thumb.createDiv({ cls: "bionic-wallpaper-delete-btn" });
+      (0, import_obsidian15.setIcon)(deleteBtn, "x");
+      deleteBtn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        const settings = this.settingsManager.settings;
+        settings.recentWallpapers = settings.recentWallpapers.filter((w) => w !== url);
+        if (settings.backgroundImage === url) {
+          settings.backgroundImage = "";
+          urlInput.value = "";
+        }
+        await this.settingsManager.saveSettings();
+        this.app.workspace.trigger("enhanced-hometab:settings-updated");
+        this.renderWallpaperGallery(container, urlInput);
+      });
     });
   }
 };
@@ -4230,13 +4471,14 @@ var HomeView = class extends import_obsidian16.ItemView {
     return "home";
   }
   async onOpen() {
-    const container = this.containerEl.children[1];
+    const container = this.contentEl;
     container.empty();
+    await this.plugin.settingsManager.loadPromise;
     this.dashboardEngine = new DashboardEngine(this.app, container, this.plugin.settingsManager);
     this.addChild(this.dashboardEngine);
   }
   async onClose() {
-    const container = this.containerEl.children[1];
+    const container = this.contentEl;
     container.empty();
   }
 };
@@ -4278,7 +4520,9 @@ var DEFAULT_SETTINGS = {
   enableGlassmorphism: false,
   recentSearches: [],
   pinnedSearches: [],
-  continueWorkingData: {}
+  continueWorkingData: {},
+  recentWallpapers: [],
+  wallpaperFit: "cover"
 };
 
 // src/managers/SettingsManager.ts
@@ -4293,9 +4537,11 @@ var SettingsManager = class {
       this.settings.widgets = { ...DEFAULT_SETTINGS.widgets, ...loadedData.widgets };
     }
   }
-  async saveSettings() {
+  async saveSettings(silent = false) {
     await this.plugin.saveData(this.settings);
-    this.plugin.app.workspace.trigger("enhanced-hometab:settings-updated");
+    if (!silent) {
+      this.plugin.app.workspace.trigger("enhanced-hometab:settings-updated");
+    }
   }
   get(key) {
     return this.settings[key];
@@ -4417,7 +4663,7 @@ var ActivityTracker = class extends import_obsidian18.Component {
     }
     this.debounceTimer = window.setTimeout(async () => {
       this.trackWorkspaceSession();
-      await this.settingsManager.saveSettings();
+      await this.settingsManager.saveSettings(true);
     }, 3e3);
   }
 };
@@ -4426,7 +4672,8 @@ var ActivityTracker = class extends import_obsidian18.Component {
 var EnhancedHometabPlugin = class extends import_obsidian19.Plugin {
   async onload() {
     this.settingsManager = new SettingsManager(this);
-    await this.settingsManager.loadSettings();
+    this.settingsManager.loadPromise = this.settingsManager.loadSettings();
+    await this.settingsManager.loadPromise;
     console.log("Enhanced Hometab Plugin loaded");
     this.activityTracker = new ActivityTracker(this.app, this.settingsManager);
     this.addChild(this.activityTracker);
