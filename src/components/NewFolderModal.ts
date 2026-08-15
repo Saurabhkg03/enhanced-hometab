@@ -10,17 +10,17 @@ export class NewFolderModal extends Modal {
 
     onOpen() {
         const { contentEl, containerEl } = this;
-        containerEl.addClass("bionic-prompt-modal-wrapper");
+        containerEl.addClass("hometab-prompt-modal-wrapper");
         contentEl.empty();
-        contentEl.addClass("bionic-prompt-modal-container");
+        contentEl.addClass("hometab-prompt-modal-container");
 
-        contentEl.createEl("h3", { text: "Create New Folder", cls: "bionic-prompt-title" });
-        contentEl.createEl("p", { text: "Enter a name for your new folder:", cls: "bionic-prompt-subtitle" });
+        contentEl.createEl("h3", { text: "Create New Folder", cls: "hometab-prompt-title" });
+        contentEl.createEl("p", { text: "Enter a name for your new folder:", cls: "hometab-prompt-subtitle" });
 
         const inputEl = contentEl.createEl("input", {
             type: "text",
             value: "New folder",
-            cls: "bionic-prompt-input"
+            cls: "hometab-prompt-input"
         });
 
         setTimeout(() => {
@@ -28,12 +28,12 @@ export class NewFolderModal extends Modal {
             inputEl.select();
         }, 50);
 
-        const btnContainer = contentEl.createDiv({ cls: "bionic-prompt-btn-container" });
+        const btnContainer = contentEl.createDiv({ cls: "hometab-prompt-btn-container" });
 
-        const cancelBtn = btnContainer.createEl("button", { text: "Cancel", cls: "bionic-prompt-btn-secondary" });
+        const cancelBtn = btnContainer.createEl("button", { text: "Cancel", cls: "hometab-prompt-btn-secondary" });
         cancelBtn.addEventListener("click", () => this.close());
 
-        const createBtn = btnContainer.createEl("button", { text: "Create Folder", cls: "bionic-prompt-btn-primary" });
+        const createBtn = btnContainer.createEl("button", { text: "Create Folder", cls: "hometab-prompt-btn-primary" });
         
         const submit = () => {
             const val = inputEl.value.trim();

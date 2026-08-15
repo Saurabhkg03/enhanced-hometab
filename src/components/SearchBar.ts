@@ -1,5 +1,5 @@
 import { App, setIcon } from "obsidian";
-import { SearchEngine, BionicSearchResult } from "../managers/SearchEngine";
+import { SearchEngine, HometabSearchResult } from "../managers/SearchEngine";
 import { SettingsManager } from "../managers/SettingsManager";
 
 export class SearchBar {
@@ -14,7 +14,7 @@ export class SearchBar {
     private debounceTimer: number | null = null;
     private currentSearchId = 0;
     
-    private searchResults: BionicSearchResult[] = [];
+    private searchResults: HometabSearchResult[] = [];
     private selectedIndex: number = -1;
 
     private documentClickListener: ((e: MouseEvent) => void) | null = null;
@@ -31,23 +31,23 @@ export class SearchBar {
         this.destroy();
 
         this.containerEl.empty();
-        this.containerEl.addClass("bionic-search-bar-container");
+        this.containerEl.addClass("hometab-search-bar-container");
         
-        const wrapperEl = this.containerEl.createDiv({ cls: "bionic-search-wrapper" });
+        const wrapperEl = this.containerEl.createDiv({ cls: "hometab-search-wrapper" });
         
-        const iconEl = wrapperEl.createDiv({ cls: "bionic-search-icon" });
+        const iconEl = wrapperEl.createDiv({ cls: "hometab-search-icon" });
         setIcon(iconEl, "search");
         
         this.inputEl = wrapperEl.createEl("input", {
             type: "text",
             placeholder: "Search notes, tags, commands...",
-            cls: "bionic-search-input"
+            cls: "hometab-search-input"
         });
         
-        const hintEl = wrapperEl.createDiv({ cls: "bionic-search-hint" });
-        hintEl.createSpan({ text: "Ctrl K", cls: "bionic-search-hint-key" });
+        const hintEl = wrapperEl.createDiv({ cls: "hometab-search-hint" });
+        hintEl.createSpan({ text: "Ctrl K", cls: "hometab-search-hint-key" });
         
-        this.resultsContainerEl = this.containerEl.createDiv({ cls: "bionic-search-results hidden" });
+        this.resultsContainerEl = this.containerEl.createDiv({ cls: "hometab-search-results hidden" });
         
         this.inputEl.addEventListener("input", () => this.onInput());
         this.inputEl.addEventListener("keydown", (e) => this.onKeyDown(e));
@@ -101,7 +101,7 @@ export class SearchBar {
     }
 
     private getNavigableItems(): HTMLElement[] {
-        return Array.from(this.resultsContainerEl.querySelectorAll<HTMLElement>('.bionic-search-result-item, .bionic-search-history-item'));
+        return Array.from(this.resultsContainerEl.querySelectorAll<HTMLElement>('.hometab-search-result-item, .hometab-search-history-item'));
     }
 
     private showEmptyState() {
@@ -113,12 +113,12 @@ export class SearchBar {
         const pinned = this.settingsManager.settings.pinnedSearches || [];
 
         if (recent.length === 0 && pinned.length === 0) {
-            this.resultsContainerEl.createDiv({ cls: "bionic-search-empty", text: "Start typing to search..." });
+            this.resultsContainerEl.createDiv({ cls: "hometab-search-empty", text: "Start typing to search..." });
         } else {
             if (pinned.length > 0) {
-                this.resultsContainerEl.createDiv({ cls: "bionic-search-section-title", text: "Pinned Searches" });
+                this.resultsContainerEl.createDiv({ cls: "hometab-search-section-title", text: "Pinned Searches" });
                 pinned.forEach(p => {
-                    const el = this.resultsContainerEl.createDiv({ cls: "bionic-search-history-item" });
+                    const el = this.resultsContainerEl.createDiv({ cls: "hometab-search-history-item" });
                     setIcon(el.createDiv({ cls: "history-icon" }), "pin");
                     el.createDiv({ cls: "history-text", text: p });
                     el.addEventListener("click", () => {
@@ -128,9 +128,9 @@ export class SearchBar {
                 });
             }
             if (recent.length > 0) {
-                this.resultsContainerEl.createDiv({ cls: "bionic-search-section-title", text: "Recent Searches" });
+                this.resultsContainerEl.createDiv({ cls: "hometab-search-section-title", text: "Recent Searches" });
                 recent.forEach(r => {
-                    const el = this.resultsContainerEl.createDiv({ cls: "bionic-search-history-item" });
+                    const el = this.resultsContainerEl.createDiv({ cls: "hometab-search-history-item" });
                     setIcon(el.createDiv({ cls: "history-icon" }), "history");
                     el.createDiv({ cls: "history-text", text: r });
                     
@@ -277,36 +277,36 @@ export class SearchBar {
         }
     }
 
-    private renderResults(results: BionicSearchResult[]) {
+    private renderResults(results: HometabSearchResult[]) {
         this.searchResults = results;
         this.selectedIndex = -1;
         this.resultsContainerEl.empty();
         
         if (results.length === 0) {
-            this.resultsContainerEl.createDiv({ cls: "bionic-search-empty", text: "No results found." });
+            this.resultsContainerEl.createDiv({ cls: "hometab-search-empty", text: "No results found." });
         } else {
             for (let i = 0; i < results.length; i++) {
                 const result = results[i];
-                const itemEl = this.resultsContainerEl.createDiv({ cls: "bionic-search-result-item" });
+                const itemEl = this.resultsContainerEl.createDiv({ cls: "hometab-search-result-item" });
                 
-                const iconContainer = itemEl.createDiv({ cls: "bionic-search-result-icon" });
+                const iconContainer = itemEl.createDiv({ cls: "hometab-search-result-icon" });
                 setIcon(iconContainer, result.icon || "file");
                 
-                const contentContainer = itemEl.createDiv({ cls: "bionic-search-result-content" });
-                const titleEl = contentContainer.createDiv({ cls: "bionic-search-result-title" });
+                const contentContainer = itemEl.createDiv({ cls: "hometab-search-result-content" });
+                const titleEl = contentContainer.createDiv({ cls: "hometab-search-result-title" });
                 this.renderHighlightedText(titleEl, result.title, result.matches);
 
                 if (result.subtitle) {
-                    const subtitleEl = contentContainer.createDiv({ cls: "bionic-search-result-subtitle" });
+                    const subtitleEl = contentContainer.createDiv({ cls: "hometab-search-result-subtitle" });
                     // No highlight for subtitle for now, unless we searched by path.
                     subtitleEl.setText(result.subtitle);
                 }
                 
                 // Quick actions
                 if (result.quickActions && result.quickActions.length > 0) {
-                    const actionsContainer = itemEl.createDiv({ cls: "bionic-search-result-actions" });
+                    const actionsContainer = itemEl.createDiv({ cls: "hometab-search-result-actions" });
                     for (const qa of result.quickActions) {
-                        const qaEl = actionsContainer.createDiv({ cls: "bionic-search-qa-btn" });
+                        const qaEl = actionsContainer.createDiv({ cls: "hometab-search-qa-btn" });
                         setIcon(qaEl, qa.icon);
                         qaEl.setAttribute("aria-label", qa.tooltip);
                         qaEl.addEventListener("click", (e) => {

@@ -1,7 +1,7 @@
 import { App, prepareFuzzySearch, SearchResult, TFile, TFolder } from "obsidian";
 import { yieldToMain } from "../utils/performance";
 
-export interface BionicSearchResult {
+export interface HometabSearchResult {
     id: string;
     type: 'file' | 'folder' | 'tag' | 'command' | 'bookmark' | 'canvas' | 'alias';
     title: string;
@@ -20,11 +20,11 @@ export class SearchEngine {
         this.app = app;
     }
 
-    public async search(query: string): Promise<BionicSearchResult[]> {
+    public async search(query: string): Promise<HometabSearchResult[]> {
         if (!query.trim()) return [];
 
         const fuzzySearch = prepareFuzzySearch(query);
-        const results: BionicSearchResult[] = [];
+        const results: HometabSearchResult[] = [];
 
         // 1. Files & Folders
         const allFiles = this.app.vault.getAllLoadedFiles();

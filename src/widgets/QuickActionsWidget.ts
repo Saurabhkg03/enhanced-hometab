@@ -26,10 +26,10 @@ export class QuickActionsWidget extends BaseWidget {
     }
 
     protected renderHeader(): void {
-        const headerEl = this.containerEl.createDiv({ cls: "bionic-section-header" });
-        headerEl.createEl("h3", { text: this.config.name, cls: "bionic-section-title" });
+        const headerEl = this.containerEl.createDiv({ cls: "hometab-section-header" });
+        headerEl.createEl("h3", { text: this.config.name, cls: "hometab-section-title" });
 
-        const menuBtnEl = headerEl.createDiv({ cls: "bionic-section-menu-btn" });
+        const menuBtnEl = headerEl.createDiv({ cls: "hometab-section-menu-btn" });
         setIcon(menuBtnEl, "more-horizontal");
         menuBtnEl.title = "Configure Workspace Launcher buttons";
 
@@ -78,7 +78,7 @@ export class QuickActionsWidget extends BaseWidget {
     }
 
     render(): void {
-        const actionsContainer = this.containerEl.createDiv({ cls: "bionic-quick-actions-grid" });
+        const actionsContainer = this.containerEl.createDiv({ cls: "hometab-quick-actions-grid" });
         
         const createFromTemplate = async (title: string, content: string) => {
             const timestamp = moment().format("YYYY-MM-DD");
@@ -244,13 +244,13 @@ export class QuickActionsWidget extends BaseWidget {
         let dragTargetId: string | null = null;
 
         for (const action of activeActions) {
-            const btnEl = actionsContainer.createDiv({ cls: "bionic-quick-action-btn" });
+            const btnEl = actionsContainer.createDiv({ cls: "hometab-quick-action-btn" });
             
             btnEl.title = `${action.label} (Alt + ${action.shortcut})`;
             
-            const iconEl = btnEl.createDiv({ cls: `bionic-quick-action-icon ${action.colorClass}` });
+            const iconEl = btnEl.createDiv({ cls: `hometab-quick-action-icon ${action.colorClass}` });
             setIcon(iconEl, action.icon);
-            btnEl.createDiv({ cls: "bionic-quick-action-label", text: action.label });
+            btnEl.createDiv({ cls: "hometab-quick-action-label", text: action.label });
             
             btnEl.addEventListener("click", (e) => action.onClick(e));
 
@@ -289,7 +289,7 @@ export class QuickActionsWidget extends BaseWidget {
                 btnEl.removeClass("dragging");
                 draggedItemId = null;
                 dragTargetId = null;
-                const items = actionsContainer.querySelectorAll(".bionic-quick-action-btn");
+                const items = actionsContainer.querySelectorAll(".hometab-quick-action-btn");
                 items.forEach(el => el.removeClass("drag-over"));
             });
 
@@ -328,7 +328,7 @@ export class QuickActionsWidget extends BaseWidget {
     }
 
     public refresh(): void {
-        const grid = this.containerEl.querySelector(".bionic-quick-actions-grid");
+        const grid = this.containerEl.querySelector(".hometab-quick-actions-grid");
         if (grid) grid.remove();
         this.render();
     }

@@ -29,7 +29,7 @@ export class TagsWidget extends BaseWidget {
     }
 
     render(): void {
-        const tagsContainer = this.containerEl.createDiv({ cls: "bionic-tags-grid" });
+        const tagsContainer = this.containerEl.createDiv({ cls: "hometab-tags-grid" });
         
         const tags = (this.app.metadataCache as any).getTags() || {};
         
@@ -38,16 +38,16 @@ export class TagsWidget extends BaseWidget {
             .slice(0, 12);
             
         if (sortedTags.length === 0) {
-            const emptyEl = tagsContainer.createDiv({ cls: "bionic-rich-empty-state" });
+            const emptyEl = tagsContainer.createDiv({ cls: "hometab-rich-empty-state" });
             
-            const iconBadge = emptyEl.createDiv({ cls: "bionic-empty-icon-badge" });
+            const iconBadge = emptyEl.createDiv({ cls: "hometab-empty-icon-badge" });
             setIcon(iconBadge, "tag");
             
-            emptyEl.createDiv({ cls: "bionic-empty-title", text: "No tags found" });
-            emptyEl.createDiv({ cls: "bionic-empty-guidance", text: "Add `#tag` keywords anywhere inside your notes to categorize and discover them here." });
+            emptyEl.createDiv({ cls: "hometab-empty-title", text: "No tags found" });
+            emptyEl.createDiv({ cls: "hometab-empty-guidance", text: "Add `#tag` keywords anywhere inside your notes to categorize and discover them here." });
             
-            const actionBtn = emptyEl.createDiv({ cls: "bionic-empty-action-btn" });
-            const btnIcon = actionBtn.createSpan({ cls: "bionic-btn-icon" });
+            const actionBtn = emptyEl.createDiv({ cls: "hometab-empty-action-btn" });
+            const btnIcon = actionBtn.createSpan({ cls: "hometab-btn-icon" });
             setIcon(btnIcon, "plus");
             actionBtn.createSpan({ text: "Create Tagged Note" });
             
@@ -65,19 +65,19 @@ export class TagsWidget extends BaseWidget {
             const color = TAG_COLORS[colorIdx % TAG_COLORS.length];
             colorIdx++;
 
-            const tagEl = tagsContainer.createDiv({ cls: "bionic-tag-pill" });
+            const tagEl = tagsContainer.createDiv({ cls: "hometab-tag-pill" });
             tagEl.style.backgroundColor = color.bg;
             tagEl.style.borderColor = color.border;
 
-            const iconEl = tagEl.createDiv({ cls: "bionic-tag-icon" });
+            const iconEl = tagEl.createDiv({ cls: "hometab-tag-icon" });
             setIcon(iconEl, "hashtag");
             iconEl.style.color = color.text;
 
             const cleanTagName = tag.replace(/^#/, "");
-            const nameEl = tagEl.createSpan({ cls: "bionic-tag-name", text: cleanTagName });
+            const nameEl = tagEl.createSpan({ cls: "hometab-tag-name", text: cleanTagName });
             nameEl.style.color = color.text;
 
-            const countEl = tagEl.createSpan({ cls: "bionic-tag-count", text: `${count}` });
+            const countEl = tagEl.createSpan({ cls: "hometab-tag-count", text: `${count}` });
 
             tagEl.addEventListener("click", () => {
                 const searchPlugin = (this.app as any).internalPlugins?.getPluginById("global-search");

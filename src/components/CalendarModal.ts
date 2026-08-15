@@ -10,9 +10,9 @@ export class CalendarModal extends Modal {
 
     onOpen() {
         const { contentEl, containerEl } = this;
-        containerEl.addClass("bionic-calendar-modal-wrapper");
+        containerEl.addClass("hometab-calendar-modal-wrapper");
         contentEl.empty();
-        contentEl.addClass("bionic-calendar-modal-container");
+        contentEl.addClass("hometab-calendar-modal-container");
 
         this.renderCalendar();
     }
@@ -30,9 +30,9 @@ export class CalendarModal extends Modal {
         ];
 
         // Header
-        const headerEl = contentEl.createDiv({ cls: "bionic-cal-header" });
+        const headerEl = contentEl.createDiv({ cls: "hometab-cal-header" });
         
-        const prevBtn = headerEl.createDiv({ cls: "bionic-cal-nav-btn" });
+        const prevBtn = headerEl.createDiv({ cls: "hometab-cal-nav-btn" });
         setIcon(prevBtn, "chevron-left");
         prevBtn.title = "Previous month";
         prevBtn.addEventListener("click", () => {
@@ -40,10 +40,10 @@ export class CalendarModal extends Modal {
             this.renderCalendar();
         });
 
-        const titleWrapper = headerEl.createDiv({ cls: "bionic-cal-title-wrapper" });
-        titleWrapper.createEl("h2", { text: `${monthNames[month]} ${year}`, cls: "bionic-cal-title" });
+        const titleWrapper = headerEl.createDiv({ cls: "hometab-cal-title-wrapper" });
+        titleWrapper.createEl("h2", { text: `${monthNames[month]} ${year}`, cls: "hometab-cal-title" });
 
-        const nextBtn = headerEl.createDiv({ cls: "bionic-cal-nav-btn" });
+        const nextBtn = headerEl.createDiv({ cls: "hometab-cal-nav-btn" });
         setIcon(nextBtn, "chevron-right");
         nextBtn.title = "Next month";
         nextBtn.addEventListener("click", () => {
@@ -52,18 +52,18 @@ export class CalendarModal extends Modal {
         });
 
         // Days of week
-        const daysHeaderEl = contentEl.createDiv({ cls: "bionic-cal-days-header" });
+        const daysHeaderEl = contentEl.createDiv({ cls: "hometab-cal-days-header" });
         const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-        dayNames.forEach(d => daysHeaderEl.createDiv({ cls: "bionic-cal-day-name", text: d }));
+        dayNames.forEach(d => daysHeaderEl.createDiv({ cls: "hometab-cal-day-name", text: d }));
 
         // Grid
-        const gridEl = contentEl.createDiv({ cls: "bionic-cal-grid" });
+        const gridEl = contentEl.createDiv({ cls: "hometab-cal-grid" });
 
         const firstDay = new Date(year, month, 1).getDay();
         const totalDays = new Date(year, month + 1, 0).getDate();
 
         for (let i = 0; i < firstDay; i++) {
-            gridEl.createDiv({ cls: "bionic-cal-day empty" });
+            gridEl.createDiv({ cls: "hometab-cal-day empty" });
         }
 
         const today = new Date();
@@ -72,8 +72,8 @@ export class CalendarModal extends Modal {
         const files = this.app.vault.getMarkdownFiles();
 
         for (let day = 1; day <= totalDays; day++) {
-            const dayEl = gridEl.createDiv({ cls: "bionic-cal-day" });
-            dayEl.createSpan({ text: `${day}`, cls: "bionic-cal-day-num" });
+            const dayEl = gridEl.createDiv({ cls: "hometab-cal-day" });
+            dayEl.createSpan({ text: `${day}`, cls: "hometab-cal-day-num" });
 
             if (isCurrentMonth && today.getDate() === day) {
                 dayEl.addClass("today");
@@ -87,7 +87,7 @@ export class CalendarModal extends Modal {
             if (existingFile) {
                 dayEl.addClass("has-note");
                 dayEl.title = `Note: ${existingFile.basename}`;
-                dayEl.createDiv({ cls: "bionic-cal-dot" });
+                dayEl.createDiv({ cls: "hometab-cal-dot" });
             }
 
             dayEl.addEventListener("click", async () => {
@@ -109,8 +109,8 @@ export class CalendarModal extends Modal {
         }
 
         // Footer with Today action
-        const footerEl = contentEl.createDiv({ cls: "bionic-cal-footer" });
-        const todayBtn = footerEl.createDiv({ cls: "bionic-cal-today-btn" });
+        const footerEl = contentEl.createDiv({ cls: "hometab-cal-footer" });
+        const todayBtn = footerEl.createDiv({ cls: "hometab-cal-today-btn" });
         const todayIcon = todayBtn.createSpan({ cls: "btn-icon" });
         setIcon(todayIcon, "calendar");
         todayBtn.createSpan({ text: "Jump to Today" });

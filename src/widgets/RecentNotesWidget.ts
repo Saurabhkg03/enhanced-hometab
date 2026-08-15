@@ -20,7 +20,7 @@ export class RecentNotesWidget extends BaseWidget {
     }
 
     render(): void {
-        const listEl = this.containerEl.createDiv({ cls: "bionic-recent-notes-list" });
+        const listEl = this.containerEl.createDiv({ cls: "hometab-recent-notes-list" });
         
         // Fetch all markdown files
         const files = this.app.vault.getMarkdownFiles();
@@ -32,16 +32,16 @@ export class RecentNotesWidget extends BaseWidget {
         const recentFiles = files.slice(0, 5);
         
         if (recentFiles.length === 0) {
-            const emptyEl = listEl.createDiv({ cls: "bionic-rich-empty-state" });
+            const emptyEl = listEl.createDiv({ cls: "hometab-rich-empty-state" });
             
-            const iconBadge = emptyEl.createDiv({ cls: "bionic-empty-icon-badge" });
+            const iconBadge = emptyEl.createDiv({ cls: "hometab-empty-icon-badge" });
             setIcon(iconBadge, "file-plus");
             
-            emptyEl.createDiv({ cls: "bionic-empty-title", text: "No notes created yet" });
-            emptyEl.createDiv({ cls: "bionic-empty-guidance", text: "Create your first note to start building your digital garden." });
+            emptyEl.createDiv({ cls: "hometab-empty-title", text: "No notes created yet" });
+            emptyEl.createDiv({ cls: "hometab-empty-guidance", text: "Create your first note to start building your digital garden." });
             
-            const actionBtn = emptyEl.createDiv({ cls: "bionic-empty-action-btn" });
-            const btnIcon = actionBtn.createSpan({ cls: "bionic-btn-icon" });
+            const actionBtn = emptyEl.createDiv({ cls: "hometab-empty-action-btn" });
+            const btnIcon = actionBtn.createSpan({ cls: "hometab-btn-icon" });
             setIcon(btnIcon, "plus");
             actionBtn.createSpan({ text: "Create New Note" });
             
@@ -55,16 +55,16 @@ export class RecentNotesWidget extends BaseWidget {
         }
 
         for (const file of recentFiles) {
-            const itemEl = listEl.createDiv({ cls: "bionic-list-item" });
+            const itemEl = listEl.createDiv({ cls: "hometab-list-item" });
             
-            const iconEl = itemEl.createDiv({ cls: "bionic-list-item-icon" });
+            const iconEl = itemEl.createDiv({ cls: "hometab-list-item-icon" });
             setIcon(iconEl, "file-text");
             
-            const infoEl = itemEl.createDiv({ cls: "bionic-list-item-info" });
-            infoEl.createDiv({ cls: "bionic-list-item-title", text: file.basename });
+            const infoEl = itemEl.createDiv({ cls: "hometab-list-item-info" });
+            infoEl.createDiv({ cls: "hometab-list-item-title", text: file.basename });
             
             const timeAgo = this.formatTimeAgo(file.stat.mtime);
-            infoEl.createDiv({ cls: "bionic-list-item-meta", text: timeAgo });
+            infoEl.createDiv({ cls: "hometab-list-item-meta", text: timeAgo });
             
             itemEl.addEventListener("click", () => {
                 this.app.workspace.getLeaf(false).openFile(file);

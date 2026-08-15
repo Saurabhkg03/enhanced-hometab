@@ -16,7 +16,7 @@ export abstract class BaseWidget extends Component implements IWidget {
         
         // Create widget container
         this.containerEl = parentEl.createDiv({ 
-            cls: `bionic-widget bionic-widget-${this.config.id}` 
+            cls: `hometab-widget hometab-widget-${this.config.id}` 
         });
         
         // Add widget header if needed
@@ -32,17 +32,17 @@ export abstract class BaseWidget extends Component implements IWidget {
     }
 
     protected renderHeader(): void {
-        const headerEl = this.containerEl.createDiv({ cls: "bionic-widget-header" });
+        const headerEl = this.containerEl.createDiv({ cls: "hometab-widget-header" });
         
-        const titleContainer = headerEl.createDiv({ cls: "bionic-widget-title-container" });
-        const iconEl = titleContainer.createDiv({ cls: "bionic-widget-header-icon" });
+        const titleContainer = headerEl.createDiv({ cls: "hometab-widget-title-container" });
+        const iconEl = titleContainer.createDiv({ cls: "hometab-widget-header-icon" });
         
         if (this.config.icon) {
             setIcon(iconEl, this.config.icon);
         }
         
-        titleContainer.createEl("h3", { text: this.config.name, cls: "bionic-widget-title" });
-        const viewAllEl = headerEl.createEl("a", { text: "View all", cls: "bionic-widget-action-link", href: "#" });
+        titleContainer.createEl("h3", { text: this.config.name, cls: "hometab-widget-title" });
+        const viewAllEl = headerEl.createEl("a", { text: "View all", cls: "hometab-widget-action-link", href: "#" });
         viewAllEl.addEventListener("click", (e) => {
             e.preventDefault();
             this.onViewAllClick();
@@ -58,7 +58,7 @@ export abstract class BaseWidget extends Component implements IWidget {
     refresh(): void {
         const children = Array.from(this.containerEl.children);
         for (const child of children) {
-            if (!child.hasClass("bionic-widget-header")) {
+            if (!child.hasClass("hometab-widget-header")) {
                 child.remove();
             }
         }

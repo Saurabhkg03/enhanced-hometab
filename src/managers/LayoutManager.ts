@@ -23,28 +23,28 @@ export class LayoutManager extends Component {
         }
 
         // Add a class so we can style the ghost element
-        containerEl.addClass("bionic-sortable-container");
+        containerEl.addClass("hometab-sortable-container");
 
         this.sortableInstance = Sortable.create(containerEl, {
             animation: 200,
             easing: "cubic-bezier(0.2, 0, 0, 1)",
-            handle: ".bionic-widget-header",
-            ghostClass: "bionic-widget-ghost",
-            chosenClass: "bionic-widget-chosen",
-            dragClass: "bionic-widget-drag",
-            fallbackClass: "bionic-widget-fallback",
+            handle: ".hometab-widget-header",
+            ghostClass: "hometab-widget-ghost",
+            chosenClass: "hometab-widget-chosen",
+            dragClass: "hometab-widget-drag",
+            fallbackClass: "hometab-widget-fallback",
             forceFallback: true,
             fallbackTolerance: 3,
             onStart: () => {
-                document.body.addClass("bionic-is-dragging");
+                document.body.addClass("hometab-is-dragging");
             },
             onEnd: async (evt) => {
-                document.body.removeClass("bionic-is-dragging");
+                document.body.removeClass("hometab-is-dragging");
                 const newOrder: string[] = [];
-                containerEl.querySelectorAll('.bionic-widget').forEach(w => {
+                containerEl.querySelectorAll('.hometab-widget').forEach(w => {
                     const id = Array.from(w.classList)
-                        .find(cls => cls.startsWith('bionic-widget-'))
-                        ?.replace('bionic-widget-', '');
+                        .find(cls => cls.startsWith('hometab-widget-'))
+                        ?.replace('hometab-widget-', '');
                     if (id) {
                         newOrder.push(id);
                     }
@@ -56,9 +56,9 @@ export class LayoutManager extends Component {
         });
         
         // Update header cursors visually
-        const widgets = containerEl.querySelectorAll('.bionic-widget');
+        const widgets = containerEl.querySelectorAll('.hometab-widget');
         widgets.forEach((widget) => {
-            const header = widget.querySelector('.bionic-widget-header') as HTMLElement;
+            const header = widget.querySelector('.hometab-widget-header') as HTMLElement;
             if (header) {
                 header.style.cursor = "grab";
             }

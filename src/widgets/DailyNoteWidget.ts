@@ -71,36 +71,36 @@ export class DailyNoteWidget extends BaseWidget {
     }
 
     async render() {
-        const subHeader = this.containerEl.createDiv({ cls: "bionic-daily-note-subheader" });
+        const subHeader = this.containerEl.createDiv({ cls: "hometab-daily-note-subheader" });
         subHeader.style.cursor = "pointer";
         subHeader.title = "Open today's task note";
         
         const dateStr = moment().format("YYYY-MM-DD");
-        subHeader.createSpan({ text: dateStr, cls: "bionic-daily-note-date" });
-        const iconEl = subHeader.createSpan({ cls: "bionic-daily-note-icon" });
+        subHeader.createSpan({ text: dateStr, cls: "hometab-daily-note-date" });
+        const iconEl = subHeader.createSpan({ cls: "hometab-daily-note-icon" });
         setIcon(iconEl, "calendar");
 
         subHeader.addEventListener("click", () => {
             this.openOrCreateTaskNote();
         });
 
-        const listEl = this.containerEl.createDiv({ cls: "bionic-tasks-list" });
-        listEl.createDiv({ cls: "bionic-loading", text: "Loading tasks..." });
+        const listEl = this.containerEl.createDiv({ cls: "hometab-tasks-list" });
+        listEl.createDiv({ cls: "hometab-loading", text: "Loading tasks..." });
 
         const tasks = await this.fetchTasks();
         listEl.empty();
 
         if (tasks.length === 0) {
-            const emptyEl = listEl.createDiv({ cls: "bionic-rich-empty-state" });
+            const emptyEl = listEl.createDiv({ cls: "hometab-rich-empty-state" });
             
-            const iconBadge = emptyEl.createDiv({ cls: "bionic-empty-icon-badge" });
+            const iconBadge = emptyEl.createDiv({ cls: "hometab-empty-icon-badge" });
             setIcon(iconBadge, "check-circle-2");
             
-            emptyEl.createDiv({ cls: "bionic-empty-title", text: "All caught up!" });
-            emptyEl.createDiv({ cls: "bionic-empty-guidance", text: "No pending `- [ ]` tasks found in your recent notes. Enjoy your day!" });
+            emptyEl.createDiv({ cls: "hometab-empty-title", text: "All caught up!" });
+            emptyEl.createDiv({ cls: "hometab-empty-guidance", text: "No pending `- [ ]` tasks found in your recent notes. Enjoy your day!" });
             
-            const actionBtn = emptyEl.createDiv({ cls: "bionic-empty-action-btn" });
-            const btnIcon = actionBtn.createSpan({ cls: "bionic-btn-icon" });
+            const actionBtn = emptyEl.createDiv({ cls: "hometab-empty-action-btn" });
+            const btnIcon = actionBtn.createSpan({ cls: "hometab-btn-icon" });
             setIcon(btnIcon, "plus-circle");
             actionBtn.createSpan({ text: "Add New Task Note" });
             
@@ -109,9 +109,9 @@ export class DailyNoteWidget extends BaseWidget {
             });
         } else {
             for (const task of tasks.slice(0, 4)) {
-                const itemEl = listEl.createDiv({ cls: "bionic-task-item" });
+                const itemEl = listEl.createDiv({ cls: "hometab-task-item" });
                 
-                const checkboxEl = itemEl.createEl("input", { type: "checkbox", cls: "bionic-task-checkbox" });
+                const checkboxEl = itemEl.createEl("input", { type: "checkbox", cls: "hometab-task-checkbox" });
                 checkboxEl.addEventListener("change", async (e) => {
                     const target = e.target as HTMLInputElement;
                     target.disabled = true;
@@ -123,8 +123,8 @@ export class DailyNoteWidget extends BaseWidget {
                     }, 500);
                 });
                 
-                const infoEl = itemEl.createDiv({ cls: "bionic-task-info" });
-                infoEl.createDiv({ cls: "bionic-task-text", text: task.text });
+                const infoEl = itemEl.createDiv({ cls: "hometab-task-info" });
+                infoEl.createDiv({ cls: "hometab-task-text", text: task.text });
                 
                 itemEl.addEventListener("click", (e) => {
                     if ((e.target as HTMLElement).tagName !== "INPUT") {
@@ -133,8 +133,8 @@ export class DailyNoteWidget extends BaseWidget {
                 });
             }
 
-            const addTaskBtn = this.containerEl.createDiv({ cls: "bionic-add-task-btn" });
-            const addIconEl = addTaskBtn.createSpan({ cls: "bionic-add-task-icon" });
+            const addTaskBtn = this.containerEl.createDiv({ cls: "hometab-add-task-btn" });
+            const addIconEl = addTaskBtn.createSpan({ cls: "hometab-add-task-icon" });
             setIcon(addIconEl, "plus");
             addTaskBtn.createSpan({ text: "Add a task" });
             addTaskBtn.addEventListener("click", () => {

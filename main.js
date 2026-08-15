@@ -306,18 +306,18 @@ var SearchBar = class {
   render() {
     this.destroy();
     this.containerEl.empty();
-    this.containerEl.addClass("bionic-search-bar-container");
-    const wrapperEl = this.containerEl.createDiv({ cls: "bionic-search-wrapper" });
-    const iconEl = wrapperEl.createDiv({ cls: "bionic-search-icon" });
+    this.containerEl.addClass("hometab-search-bar-container");
+    const wrapperEl = this.containerEl.createDiv({ cls: "hometab-search-wrapper" });
+    const iconEl = wrapperEl.createDiv({ cls: "hometab-search-icon" });
     (0, import_obsidian3.setIcon)(iconEl, "search");
     this.inputEl = wrapperEl.createEl("input", {
       type: "text",
       placeholder: "Search notes, tags, commands...",
-      cls: "bionic-search-input"
+      cls: "hometab-search-input"
     });
-    const hintEl = wrapperEl.createDiv({ cls: "bionic-search-hint" });
-    hintEl.createSpan({ text: "Ctrl K", cls: "bionic-search-hint-key" });
-    this.resultsContainerEl = this.containerEl.createDiv({ cls: "bionic-search-results hidden" });
+    const hintEl = wrapperEl.createDiv({ cls: "hometab-search-hint" });
+    hintEl.createSpan({ text: "Ctrl K", cls: "hometab-search-hint-key" });
+    this.resultsContainerEl = this.containerEl.createDiv({ cls: "hometab-search-results hidden" });
     this.inputEl.addEventListener("input", () => this.onInput());
     this.inputEl.addEventListener("keydown", (e) => this.onKeyDown(e));
     this.inputEl.addEventListener("focus", () => {
@@ -367,7 +367,7 @@ var SearchBar = class {
     }
   }
   getNavigableItems() {
-    return Array.from(this.resultsContainerEl.querySelectorAll(".bionic-search-result-item, .bionic-search-history-item"));
+    return Array.from(this.resultsContainerEl.querySelectorAll(".hometab-search-result-item, .hometab-search-history-item"));
   }
   showEmptyState() {
     this.resultsContainerEl.empty();
@@ -376,12 +376,12 @@ var SearchBar = class {
     const recent = this.settingsManager.settings.recentSearches || [];
     const pinned = this.settingsManager.settings.pinnedSearches || [];
     if (recent.length === 0 && pinned.length === 0) {
-      this.resultsContainerEl.createDiv({ cls: "bionic-search-empty", text: "Start typing to search..." });
+      this.resultsContainerEl.createDiv({ cls: "hometab-search-empty", text: "Start typing to search..." });
     } else {
       if (pinned.length > 0) {
-        this.resultsContainerEl.createDiv({ cls: "bionic-search-section-title", text: "Pinned Searches" });
+        this.resultsContainerEl.createDiv({ cls: "hometab-search-section-title", text: "Pinned Searches" });
         pinned.forEach((p) => {
-          const el = this.resultsContainerEl.createDiv({ cls: "bionic-search-history-item" });
+          const el = this.resultsContainerEl.createDiv({ cls: "hometab-search-history-item" });
           (0, import_obsidian3.setIcon)(el.createDiv({ cls: "history-icon" }), "pin");
           el.createDiv({ cls: "history-text", text: p });
           el.addEventListener("click", () => {
@@ -391,9 +391,9 @@ var SearchBar = class {
         });
       }
       if (recent.length > 0) {
-        this.resultsContainerEl.createDiv({ cls: "bionic-search-section-title", text: "Recent Searches" });
+        this.resultsContainerEl.createDiv({ cls: "hometab-search-section-title", text: "Recent Searches" });
         recent.forEach((r) => {
-          const el = this.resultsContainerEl.createDiv({ cls: "bionic-search-history-item" });
+          const el = this.resultsContainerEl.createDiv({ cls: "hometab-search-history-item" });
           (0, import_obsidian3.setIcon)(el.createDiv({ cls: "history-icon" }), "history");
           el.createDiv({ cls: "history-text", text: r });
           const deleteBtn = el.createDiv({ cls: "history-delete-btn" });
@@ -517,24 +517,24 @@ var SearchBar = class {
     this.selectedIndex = -1;
     this.resultsContainerEl.empty();
     if (results.length === 0) {
-      this.resultsContainerEl.createDiv({ cls: "bionic-search-empty", text: "No results found." });
+      this.resultsContainerEl.createDiv({ cls: "hometab-search-empty", text: "No results found." });
     } else {
       for (let i = 0; i < results.length; i++) {
         const result = results[i];
-        const itemEl = this.resultsContainerEl.createDiv({ cls: "bionic-search-result-item" });
-        const iconContainer = itemEl.createDiv({ cls: "bionic-search-result-icon" });
+        const itemEl = this.resultsContainerEl.createDiv({ cls: "hometab-search-result-item" });
+        const iconContainer = itemEl.createDiv({ cls: "hometab-search-result-icon" });
         (0, import_obsidian3.setIcon)(iconContainer, result.icon || "file");
-        const contentContainer = itemEl.createDiv({ cls: "bionic-search-result-content" });
-        const titleEl = contentContainer.createDiv({ cls: "bionic-search-result-title" });
+        const contentContainer = itemEl.createDiv({ cls: "hometab-search-result-content" });
+        const titleEl = contentContainer.createDiv({ cls: "hometab-search-result-title" });
         this.renderHighlightedText(titleEl, result.title, result.matches);
         if (result.subtitle) {
-          const subtitleEl = contentContainer.createDiv({ cls: "bionic-search-result-subtitle" });
+          const subtitleEl = contentContainer.createDiv({ cls: "hometab-search-result-subtitle" });
           subtitleEl.setText(result.subtitle);
         }
         if (result.quickActions && result.quickActions.length > 0) {
-          const actionsContainer = itemEl.createDiv({ cls: "bionic-search-result-actions" });
+          const actionsContainer = itemEl.createDiv({ cls: "hometab-search-result-actions" });
           for (const qa of result.quickActions) {
-            const qaEl = actionsContainer.createDiv({ cls: "bionic-search-qa-btn" });
+            const qaEl = actionsContainer.createDiv({ cls: "hometab-search-qa-btn" });
             (0, import_obsidian3.setIcon)(qaEl, qa.icon);
             qaEl.setAttribute("aria-label", qa.tooltip);
             qaEl.addEventListener("click", (e) => {
@@ -578,7 +578,7 @@ var BaseWidget = class extends import_obsidian4.Component {
   mount(app, parentEl2) {
     this.app = app;
     this.containerEl = parentEl2.createDiv({
-      cls: `bionic-widget bionic-widget-${this.config.id}`
+      cls: `hometab-widget hometab-widget-${this.config.id}`
     });
     this.renderHeader();
     this.render();
@@ -588,14 +588,14 @@ var BaseWidget = class extends import_obsidian4.Component {
     this.containerEl.remove();
   }
   renderHeader() {
-    const headerEl = this.containerEl.createDiv({ cls: "bionic-widget-header" });
-    const titleContainer = headerEl.createDiv({ cls: "bionic-widget-title-container" });
-    const iconEl = titleContainer.createDiv({ cls: "bionic-widget-header-icon" });
+    const headerEl = this.containerEl.createDiv({ cls: "hometab-widget-header" });
+    const titleContainer = headerEl.createDiv({ cls: "hometab-widget-title-container" });
+    const iconEl = titleContainer.createDiv({ cls: "hometab-widget-header-icon" });
     if (this.config.icon) {
       (0, import_obsidian4.setIcon)(iconEl, this.config.icon);
     }
-    titleContainer.createEl("h3", { text: this.config.name, cls: "bionic-widget-title" });
-    const viewAllEl = headerEl.createEl("a", { text: "View all", cls: "bionic-widget-action-link", href: "#" });
+    titleContainer.createEl("h3", { text: this.config.name, cls: "hometab-widget-title" });
+    const viewAllEl = headerEl.createEl("a", { text: "View all", cls: "hometab-widget-action-link", href: "#" });
     viewAllEl.addEventListener("click", (e) => {
       e.preventDefault();
       this.onViewAllClick();
@@ -607,7 +607,7 @@ var BaseWidget = class extends import_obsidian4.Component {
   refresh() {
     const children = Array.from(this.containerEl.children);
     for (const child of children) {
-      if (!child.hasClass("bionic-widget-header")) {
+      if (!child.hasClass("hometab-widget-header")) {
         child.remove();
       }
     }
@@ -627,9 +627,9 @@ var CalendarModal = class extends import_obsidian5.Modal {
   }
   onOpen() {
     const { contentEl, containerEl } = this;
-    containerEl.addClass("bionic-calendar-modal-wrapper");
+    containerEl.addClass("hometab-calendar-modal-wrapper");
     contentEl.empty();
-    contentEl.addClass("bionic-calendar-modal-container");
+    contentEl.addClass("hometab-calendar-modal-container");
     this.renderCalendar();
   }
   renderCalendar() {
@@ -651,38 +651,38 @@ var CalendarModal = class extends import_obsidian5.Modal {
       "November",
       "December"
     ];
-    const headerEl = contentEl.createDiv({ cls: "bionic-cal-header" });
-    const prevBtn = headerEl.createDiv({ cls: "bionic-cal-nav-btn" });
+    const headerEl = contentEl.createDiv({ cls: "hometab-cal-header" });
+    const prevBtn = headerEl.createDiv({ cls: "hometab-cal-nav-btn" });
     (0, import_obsidian5.setIcon)(prevBtn, "chevron-left");
     prevBtn.title = "Previous month";
     prevBtn.addEventListener("click", () => {
       this.currentDate.setMonth(this.currentDate.getMonth() - 1);
       this.renderCalendar();
     });
-    const titleWrapper = headerEl.createDiv({ cls: "bionic-cal-title-wrapper" });
-    titleWrapper.createEl("h2", { text: `${monthNames[month]} ${year}`, cls: "bionic-cal-title" });
-    const nextBtn = headerEl.createDiv({ cls: "bionic-cal-nav-btn" });
+    const titleWrapper = headerEl.createDiv({ cls: "hometab-cal-title-wrapper" });
+    titleWrapper.createEl("h2", { text: `${monthNames[month]} ${year}`, cls: "hometab-cal-title" });
+    const nextBtn = headerEl.createDiv({ cls: "hometab-cal-nav-btn" });
     (0, import_obsidian5.setIcon)(nextBtn, "chevron-right");
     nextBtn.title = "Next month";
     nextBtn.addEventListener("click", () => {
       this.currentDate.setMonth(this.currentDate.getMonth() + 1);
       this.renderCalendar();
     });
-    const daysHeaderEl = contentEl.createDiv({ cls: "bionic-cal-days-header" });
+    const daysHeaderEl = contentEl.createDiv({ cls: "hometab-cal-days-header" });
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    dayNames.forEach((d) => daysHeaderEl.createDiv({ cls: "bionic-cal-day-name", text: d }));
-    const gridEl = contentEl.createDiv({ cls: "bionic-cal-grid" });
+    dayNames.forEach((d) => daysHeaderEl.createDiv({ cls: "hometab-cal-day-name", text: d }));
+    const gridEl = contentEl.createDiv({ cls: "hometab-cal-grid" });
     const firstDay = new Date(year, month, 1).getDay();
     const totalDays = new Date(year, month + 1, 0).getDate();
     for (let i = 0; i < firstDay; i++) {
-      gridEl.createDiv({ cls: "bionic-cal-day empty" });
+      gridEl.createDiv({ cls: "hometab-cal-day empty" });
     }
     const today = /* @__PURE__ */ new Date();
     const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
     const files = this.app.vault.getMarkdownFiles();
     for (let day = 1; day <= totalDays; day++) {
-      const dayEl = gridEl.createDiv({ cls: "bionic-cal-day" });
-      dayEl.createSpan({ text: `${day}`, cls: "bionic-cal-day-num" });
+      const dayEl = gridEl.createDiv({ cls: "hometab-cal-day" });
+      dayEl.createSpan({ text: `${day}`, cls: "hometab-cal-day-num" });
       if (isCurrentMonth && today.getDate() === day) {
         dayEl.addClass("today");
       }
@@ -693,7 +693,7 @@ var CalendarModal = class extends import_obsidian5.Modal {
       if (existingFile) {
         dayEl.addClass("has-note");
         dayEl.title = `Note: ${existingFile.basename}`;
-        dayEl.createDiv({ cls: "bionic-cal-dot" });
+        dayEl.createDiv({ cls: "hometab-cal-dot" });
       }
       dayEl.addEventListener("click", async () => {
         this.close();
@@ -715,8 +715,8 @@ var CalendarModal = class extends import_obsidian5.Modal {
         }
       });
     }
-    const footerEl = contentEl.createDiv({ cls: "bionic-cal-footer" });
-    const todayBtn = footerEl.createDiv({ cls: "bionic-cal-today-btn" });
+    const footerEl = contentEl.createDiv({ cls: "hometab-cal-footer" });
+    const todayBtn = footerEl.createDiv({ cls: "hometab-cal-today-btn" });
     const todayIcon = todayBtn.createSpan({ cls: "btn-icon" });
     (0, import_obsidian5.setIcon)(todayIcon, "calendar");
     todayBtn.createSpan({ text: "Jump to Today" });
@@ -740,24 +740,24 @@ var NewFolderModal = class extends import_obsidian6.Modal {
   }
   onOpen() {
     const { contentEl, containerEl } = this;
-    containerEl.addClass("bionic-prompt-modal-wrapper");
+    containerEl.addClass("hometab-prompt-modal-wrapper");
     contentEl.empty();
-    contentEl.addClass("bionic-prompt-modal-container");
-    contentEl.createEl("h3", { text: "Create New Folder", cls: "bionic-prompt-title" });
-    contentEl.createEl("p", { text: "Enter a name for your new folder:", cls: "bionic-prompt-subtitle" });
+    contentEl.addClass("hometab-prompt-modal-container");
+    contentEl.createEl("h3", { text: "Create New Folder", cls: "hometab-prompt-title" });
+    contentEl.createEl("p", { text: "Enter a name for your new folder:", cls: "hometab-prompt-subtitle" });
     const inputEl = contentEl.createEl("input", {
       type: "text",
       value: "New folder",
-      cls: "bionic-prompt-input"
+      cls: "hometab-prompt-input"
     });
     setTimeout(() => {
       inputEl.focus();
       inputEl.select();
     }, 50);
-    const btnContainer = contentEl.createDiv({ cls: "bionic-prompt-btn-container" });
-    const cancelBtn = btnContainer.createEl("button", { text: "Cancel", cls: "bionic-prompt-btn-secondary" });
+    const btnContainer = contentEl.createDiv({ cls: "hometab-prompt-btn-container" });
+    const cancelBtn = btnContainer.createEl("button", { text: "Cancel", cls: "hometab-prompt-btn-secondary" });
     cancelBtn.addEventListener("click", () => this.close());
-    const createBtn = btnContainer.createEl("button", { text: "Create Folder", cls: "bionic-prompt-btn-primary" });
+    const createBtn = btnContainer.createEl("button", { text: "Create Folder", cls: "hometab-prompt-btn-primary" });
     const submit = () => {
       const val = inputEl.value.trim();
       if (val) {
@@ -792,9 +792,9 @@ var QuickActionsWidget = class extends BaseWidget {
     this.shortcutListener = null;
   }
   renderHeader() {
-    const headerEl = this.containerEl.createDiv({ cls: "bionic-section-header" });
-    headerEl.createEl("h3", { text: this.config.name, cls: "bionic-section-title" });
-    const menuBtnEl = headerEl.createDiv({ cls: "bionic-section-menu-btn" });
+    const headerEl = this.containerEl.createDiv({ cls: "hometab-section-header" });
+    headerEl.createEl("h3", { text: this.config.name, cls: "hometab-section-title" });
+    const menuBtnEl = headerEl.createDiv({ cls: "hometab-section-menu-btn" });
     (0, import_obsidian7.setIcon)(menuBtnEl, "more-horizontal");
     menuBtnEl.title = "Configure Workspace Launcher buttons";
     menuBtnEl.addEventListener("click", (e) => {
@@ -834,7 +834,7 @@ var QuickActionsWidget = class extends BaseWidget {
   }
   render() {
     var _a, _b;
-    const actionsContainer = this.containerEl.createDiv({ cls: "bionic-quick-actions-grid" });
+    const actionsContainer = this.containerEl.createDiv({ cls: "hometab-quick-actions-grid" });
     const createFromTemplate = async (title, content) => {
       const timestamp = (0, import_obsidian7.moment)().format("YYYY-MM-DD");
       const finalContent = content.replace(/{{date}}/g, timestamp);
@@ -1052,11 +1052,11 @@ var QuickActionsWidget = class extends BaseWidget {
     let draggedItemId = null;
     let dragTargetId = null;
     for (const action of activeActions) {
-      const btnEl = actionsContainer.createDiv({ cls: "bionic-quick-action-btn" });
+      const btnEl = actionsContainer.createDiv({ cls: "hometab-quick-action-btn" });
       btnEl.title = `${action.label} (Alt + ${action.shortcut})`;
-      const iconEl = btnEl.createDiv({ cls: `bionic-quick-action-icon ${action.colorClass}` });
+      const iconEl = btnEl.createDiv({ cls: `hometab-quick-action-icon ${action.colorClass}` });
       (0, import_obsidian7.setIcon)(iconEl, action.icon);
-      btnEl.createDiv({ cls: "bionic-quick-action-label", text: action.label });
+      btnEl.createDiv({ cls: "hometab-quick-action-label", text: action.label });
       btnEl.addEventListener("click", (e) => action.onClick(e));
       btnEl.addEventListener("contextmenu", (e) => {
         e.preventDefault();
@@ -1087,7 +1087,7 @@ var QuickActionsWidget = class extends BaseWidget {
         btnEl.removeClass("dragging");
         draggedItemId = null;
         dragTargetId = null;
-        const items = actionsContainer.querySelectorAll(".bionic-quick-action-btn");
+        const items = actionsContainer.querySelectorAll(".hometab-quick-action-btn");
         items.forEach((el) => el.removeClass("drag-over"));
       });
       btnEl.addEventListener("dragover", (e) => {
@@ -1120,7 +1120,7 @@ var QuickActionsWidget = class extends BaseWidget {
     }
   }
   refresh() {
-    const grid = this.containerEl.querySelector(".bionic-quick-actions-grid");
+    const grid = this.containerEl.querySelector(".hometab-quick-actions-grid");
     if (grid)
       grid.remove();
     this.render();
@@ -1147,20 +1147,20 @@ var PinnedWidget = class extends BaseWidget {
   }
   render() {
     var _a, _b, _c, _d;
-    const listEl = this.containerEl.createDiv({ cls: "bionic-recent-notes-list" });
+    const listEl = this.containerEl.createDiv({ cls: "hometab-recent-notes-list" });
     let bookmarks = [];
     const bookmarksPlugin = (_c = (_b = (_a = this.app.internalPlugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b.bookmarks) == null ? void 0 : _c.instance;
     if (bookmarksPlugin && bookmarksPlugin.getBookmarks) {
       bookmarks = bookmarksPlugin.getBookmarks().filter((b) => b.type === "file");
     }
     if (bookmarks.length === 0) {
-      const emptyEl = listEl.createDiv({ cls: "bionic-rich-empty-state" });
-      const iconBadge = emptyEl.createDiv({ cls: "bionic-empty-icon-badge" });
+      const emptyEl = listEl.createDiv({ cls: "hometab-rich-empty-state" });
+      const iconBadge = emptyEl.createDiv({ cls: "hometab-empty-icon-badge" });
       (0, import_obsidian8.setIcon)(iconBadge, "bookmark");
-      emptyEl.createDiv({ cls: "bionic-empty-title", text: "No pinned notes" });
-      emptyEl.createDiv({ cls: "bionic-empty-guidance", text: "Right-click any file in your file explorer and choose 'Bookmark' to pin it here." });
-      const actionBtn = emptyEl.createDiv({ cls: "bionic-empty-action-btn" });
-      const btnIcon = actionBtn.createSpan({ cls: "bionic-btn-icon" });
+      emptyEl.createDiv({ cls: "hometab-empty-title", text: "No pinned notes" });
+      emptyEl.createDiv({ cls: "hometab-empty-guidance", text: "Right-click any file in your file explorer and choose 'Bookmark' to pin it here." });
+      const actionBtn = emptyEl.createDiv({ cls: "hometab-empty-action-btn" });
+      const btnIcon = actionBtn.createSpan({ cls: "hometab-btn-icon" });
       (0, import_obsidian8.setIcon)(btnIcon, "search");
       actionBtn.createSpan({ text: "Browse Files" });
       actionBtn.addEventListener("click", () => {
@@ -1172,11 +1172,11 @@ var PinnedWidget = class extends BaseWidget {
       return;
     }
     for (const bookmark of bookmarks.slice(0, 5)) {
-      const itemEl = listEl.createDiv({ cls: "bionic-list-item" });
-      const iconEl = itemEl.createDiv({ cls: "bionic-list-item-icon" });
+      const itemEl = listEl.createDiv({ cls: "hometab-list-item" });
+      const iconEl = itemEl.createDiv({ cls: "hometab-list-item-icon" });
       (0, import_obsidian8.setIcon)(iconEl, "pin");
-      const infoEl = itemEl.createDiv({ cls: "bionic-list-item-info" });
-      infoEl.createDiv({ cls: "bionic-list-item-title", text: bookmark.title || ((_d = bookmark.path.split("/").pop()) == null ? void 0 : _d.replace(".md", "")) });
+      const infoEl = itemEl.createDiv({ cls: "hometab-list-item-info" });
+      infoEl.createDiv({ cls: "hometab-list-item-title", text: bookmark.title || ((_d = bookmark.path.split("/").pop()) == null ? void 0 : _d.replace(".md", "")) });
       const file = this.app.vault.getAbstractFileByPath(bookmark.path);
       if (file && file instanceof import_obsidian8.TFile) {
         const cache = this.app.metadataCache.getFileCache(file);
@@ -1184,12 +1184,12 @@ var PinnedWidget = class extends BaseWidget {
         if ((cache == null ? void 0 : cache.tags) && cache.tags.length > 0) {
           metaText = cache.tags[0].tag;
         }
-        infoEl.createDiv({ cls: "bionic-list-item-meta bionic-tag-meta", text: metaText });
+        infoEl.createDiv({ cls: "hometab-list-item-meta hometab-tag-meta", text: metaText });
         itemEl.addEventListener("click", () => {
           this.app.workspace.getLeaf(false).openFile(file);
         });
       } else {
-        infoEl.createDiv({ cls: "bionic-list-item-meta bionic-tag-meta", text: "#pinned" });
+        infoEl.createDiv({ cls: "hometab-list-item-meta hometab-tag-meta", text: "#pinned" });
       }
     }
   }
@@ -1214,18 +1214,18 @@ var RecentNotesWidget = class extends BaseWidget {
     }
   }
   render() {
-    const listEl = this.containerEl.createDiv({ cls: "bionic-recent-notes-list" });
+    const listEl = this.containerEl.createDiv({ cls: "hometab-recent-notes-list" });
     const files = this.app.vault.getMarkdownFiles();
     files.sort((a, b) => b.stat.mtime - a.stat.mtime);
     const recentFiles = files.slice(0, 5);
     if (recentFiles.length === 0) {
-      const emptyEl = listEl.createDiv({ cls: "bionic-rich-empty-state" });
-      const iconBadge = emptyEl.createDiv({ cls: "bionic-empty-icon-badge" });
+      const emptyEl = listEl.createDiv({ cls: "hometab-rich-empty-state" });
+      const iconBadge = emptyEl.createDiv({ cls: "hometab-empty-icon-badge" });
       (0, import_obsidian9.setIcon)(iconBadge, "file-plus");
-      emptyEl.createDiv({ cls: "bionic-empty-title", text: "No notes created yet" });
-      emptyEl.createDiv({ cls: "bionic-empty-guidance", text: "Create your first note to start building your digital garden." });
-      const actionBtn = emptyEl.createDiv({ cls: "bionic-empty-action-btn" });
-      const btnIcon = actionBtn.createSpan({ cls: "bionic-btn-icon" });
+      emptyEl.createDiv({ cls: "hometab-empty-title", text: "No notes created yet" });
+      emptyEl.createDiv({ cls: "hometab-empty-guidance", text: "Create your first note to start building your digital garden." });
+      const actionBtn = emptyEl.createDiv({ cls: "hometab-empty-action-btn" });
+      const btnIcon = actionBtn.createSpan({ cls: "hometab-btn-icon" });
       (0, import_obsidian9.setIcon)(btnIcon, "plus");
       actionBtn.createSpan({ text: "Create New Note" });
       actionBtn.addEventListener("click", () => {
@@ -1237,13 +1237,13 @@ var RecentNotesWidget = class extends BaseWidget {
       return;
     }
     for (const file of recentFiles) {
-      const itemEl = listEl.createDiv({ cls: "bionic-list-item" });
-      const iconEl = itemEl.createDiv({ cls: "bionic-list-item-icon" });
+      const itemEl = listEl.createDiv({ cls: "hometab-list-item" });
+      const iconEl = itemEl.createDiv({ cls: "hometab-list-item-icon" });
       (0, import_obsidian9.setIcon)(iconEl, "file-text");
-      const infoEl = itemEl.createDiv({ cls: "bionic-list-item-info" });
-      infoEl.createDiv({ cls: "bionic-list-item-title", text: file.basename });
+      const infoEl = itemEl.createDiv({ cls: "hometab-list-item-info" });
+      infoEl.createDiv({ cls: "hometab-list-item-title", text: file.basename });
       const timeAgo = this.formatTimeAgo(file.stat.mtime);
-      infoEl.createDiv({ cls: "bionic-list-item-meta", text: timeAgo });
+      infoEl.createDiv({ cls: "hometab-list-item-meta", text: timeAgo });
       itemEl.addEventListener("click", () => {
         this.app.workspace.getLeaf(false).openFile(file);
       });
@@ -1323,28 +1323,28 @@ var DailyNoteWidget = class extends BaseWidget {
     }
   }
   async render() {
-    const subHeader = this.containerEl.createDiv({ cls: "bionic-daily-note-subheader" });
+    const subHeader = this.containerEl.createDiv({ cls: "hometab-daily-note-subheader" });
     subHeader.style.cursor = "pointer";
     subHeader.title = "Open today's task note";
     const dateStr = (0, import_obsidian10.moment)().format("YYYY-MM-DD");
-    subHeader.createSpan({ text: dateStr, cls: "bionic-daily-note-date" });
-    const iconEl = subHeader.createSpan({ cls: "bionic-daily-note-icon" });
+    subHeader.createSpan({ text: dateStr, cls: "hometab-daily-note-date" });
+    const iconEl = subHeader.createSpan({ cls: "hometab-daily-note-icon" });
     (0, import_obsidian10.setIcon)(iconEl, "calendar");
     subHeader.addEventListener("click", () => {
       this.openOrCreateTaskNote();
     });
-    const listEl = this.containerEl.createDiv({ cls: "bionic-tasks-list" });
-    listEl.createDiv({ cls: "bionic-loading", text: "Loading tasks..." });
+    const listEl = this.containerEl.createDiv({ cls: "hometab-tasks-list" });
+    listEl.createDiv({ cls: "hometab-loading", text: "Loading tasks..." });
     const tasks = await this.fetchTasks();
     listEl.empty();
     if (tasks.length === 0) {
-      const emptyEl = listEl.createDiv({ cls: "bionic-rich-empty-state" });
-      const iconBadge = emptyEl.createDiv({ cls: "bionic-empty-icon-badge" });
+      const emptyEl = listEl.createDiv({ cls: "hometab-rich-empty-state" });
+      const iconBadge = emptyEl.createDiv({ cls: "hometab-empty-icon-badge" });
       (0, import_obsidian10.setIcon)(iconBadge, "check-circle-2");
-      emptyEl.createDiv({ cls: "bionic-empty-title", text: "All caught up!" });
-      emptyEl.createDiv({ cls: "bionic-empty-guidance", text: "No pending `- [ ]` tasks found in your recent notes. Enjoy your day!" });
-      const actionBtn = emptyEl.createDiv({ cls: "bionic-empty-action-btn" });
-      const btnIcon = actionBtn.createSpan({ cls: "bionic-btn-icon" });
+      emptyEl.createDiv({ cls: "hometab-empty-title", text: "All caught up!" });
+      emptyEl.createDiv({ cls: "hometab-empty-guidance", text: "No pending `- [ ]` tasks found in your recent notes. Enjoy your day!" });
+      const actionBtn = emptyEl.createDiv({ cls: "hometab-empty-action-btn" });
+      const btnIcon = actionBtn.createSpan({ cls: "hometab-btn-icon" });
       (0, import_obsidian10.setIcon)(btnIcon, "plus-circle");
       actionBtn.createSpan({ text: "Add New Task Note" });
       actionBtn.addEventListener("click", () => {
@@ -1352,8 +1352,8 @@ var DailyNoteWidget = class extends BaseWidget {
       });
     } else {
       for (const task of tasks.slice(0, 4)) {
-        const itemEl = listEl.createDiv({ cls: "bionic-task-item" });
-        const checkboxEl = itemEl.createEl("input", { type: "checkbox", cls: "bionic-task-checkbox" });
+        const itemEl = listEl.createDiv({ cls: "hometab-task-item" });
+        const checkboxEl = itemEl.createEl("input", { type: "checkbox", cls: "hometab-task-checkbox" });
         checkboxEl.addEventListener("change", async (e) => {
           const target = e.target;
           target.disabled = true;
@@ -1364,16 +1364,16 @@ var DailyNoteWidget = class extends BaseWidget {
             itemEl.style.display = "none";
           }, 500);
         });
-        const infoEl = itemEl.createDiv({ cls: "bionic-task-info" });
-        infoEl.createDiv({ cls: "bionic-task-text", text: task.text });
+        const infoEl = itemEl.createDiv({ cls: "hometab-task-info" });
+        infoEl.createDiv({ cls: "hometab-task-text", text: task.text });
         itemEl.addEventListener("click", (e) => {
           if (e.target.tagName !== "INPUT") {
             this.app.workspace.getLeaf(false).openFile(task.file);
           }
         });
       }
-      const addTaskBtn = this.containerEl.createDiv({ cls: "bionic-add-task-btn" });
-      const addIconEl = addTaskBtn.createSpan({ cls: "bionic-add-task-icon" });
+      const addTaskBtn = this.containerEl.createDiv({ cls: "hometab-add-task-btn" });
+      const addIconEl = addTaskBtn.createSpan({ cls: "hometab-add-task-icon" });
       (0, import_obsidian10.setIcon)(addIconEl, "plus");
       addTaskBtn.createSpan({ text: "Add a task" });
       addTaskBtn.addEventListener("click", () => {
@@ -1469,17 +1469,17 @@ var TagsWidget = class extends BaseWidget {
     }
   }
   render() {
-    const tagsContainer = this.containerEl.createDiv({ cls: "bionic-tags-grid" });
+    const tagsContainer = this.containerEl.createDiv({ cls: "hometab-tags-grid" });
     const tags = this.app.metadataCache.getTags() || {};
     const sortedTags = Object.entries(tags).sort((a, b) => b[1] - a[1]).slice(0, 12);
     if (sortedTags.length === 0) {
-      const emptyEl = tagsContainer.createDiv({ cls: "bionic-rich-empty-state" });
-      const iconBadge = emptyEl.createDiv({ cls: "bionic-empty-icon-badge" });
+      const emptyEl = tagsContainer.createDiv({ cls: "hometab-rich-empty-state" });
+      const iconBadge = emptyEl.createDiv({ cls: "hometab-empty-icon-badge" });
       (0, import_obsidian11.setIcon)(iconBadge, "tag");
-      emptyEl.createDiv({ cls: "bionic-empty-title", text: "No tags found" });
-      emptyEl.createDiv({ cls: "bionic-empty-guidance", text: "Add `#tag` keywords anywhere inside your notes to categorize and discover them here." });
-      const actionBtn = emptyEl.createDiv({ cls: "bionic-empty-action-btn" });
-      const btnIcon = actionBtn.createSpan({ cls: "bionic-btn-icon" });
+      emptyEl.createDiv({ cls: "hometab-empty-title", text: "No tags found" });
+      emptyEl.createDiv({ cls: "hometab-empty-guidance", text: "Add `#tag` keywords anywhere inside your notes to categorize and discover them here." });
+      const actionBtn = emptyEl.createDiv({ cls: "hometab-empty-action-btn" });
+      const btnIcon = actionBtn.createSpan({ cls: "hometab-btn-icon" });
       (0, import_obsidian11.setIcon)(btnIcon, "plus");
       actionBtn.createSpan({ text: "Create Tagged Note" });
       actionBtn.addEventListener("click", () => {
@@ -1494,16 +1494,16 @@ var TagsWidget = class extends BaseWidget {
     for (const [tag, count] of sortedTags) {
       const color = TAG_COLORS[colorIdx % TAG_COLORS.length];
       colorIdx++;
-      const tagEl = tagsContainer.createDiv({ cls: "bionic-tag-pill" });
+      const tagEl = tagsContainer.createDiv({ cls: "hometab-tag-pill" });
       tagEl.style.backgroundColor = color.bg;
       tagEl.style.borderColor = color.border;
-      const iconEl = tagEl.createDiv({ cls: "bionic-tag-icon" });
+      const iconEl = tagEl.createDiv({ cls: "hometab-tag-icon" });
       (0, import_obsidian11.setIcon)(iconEl, "hashtag");
       iconEl.style.color = color.text;
       const cleanTagName = tag.replace(/^#/, "");
-      const nameEl = tagEl.createSpan({ cls: "bionic-tag-name", text: cleanTagName });
+      const nameEl = tagEl.createSpan({ cls: "hometab-tag-name", text: cleanTagName });
       nameEl.style.color = color.text;
-      const countEl = tagEl.createSpan({ cls: "bionic-tag-count", text: `${count}` });
+      const countEl = tagEl.createSpan({ cls: "hometab-tag-count", text: `${count}` });
       tagEl.addEventListener("click", () => {
         var _a;
         const searchPlugin = (_a = this.app.internalPlugins) == null ? void 0 : _a.getPluginById("global-search");
@@ -1537,7 +1537,7 @@ var BacklinksWidget = class extends BaseWidget {
   }
   render() {
     var _a;
-    const listEl = this.containerEl.createDiv({ cls: "bionic-backlinks-list" });
+    const listEl = this.containerEl.createDiv({ cls: "hometab-backlinks-list" });
     const resolvedLinks = ((_a = this.app.metadataCache) == null ? void 0 : _a.resolvedLinks) || {};
     const backlinkCounts = {};
     for (const sourcePath in resolvedLinks) {
@@ -1562,13 +1562,13 @@ var BacklinksWidget = class extends BaseWidget {
     if (items.length === 0) {
       const markdownFiles = this.app.vault.getMarkdownFiles().sort((a, b) => b.stat.mtime - a.stat.mtime).slice(0, 5);
       if (markdownFiles.length === 0) {
-        const emptyEl = listEl.createDiv({ cls: "bionic-rich-empty-state" });
-        const iconBadge = emptyEl.createDiv({ cls: "bionic-empty-icon-badge" });
+        const emptyEl = listEl.createDiv({ cls: "hometab-rich-empty-state" });
+        const iconBadge = emptyEl.createDiv({ cls: "hometab-empty-icon-badge" });
         (0, import_obsidian12.setIcon)(iconBadge, "link-2-off");
-        emptyEl.createDiv({ cls: "bionic-empty-title", text: "No connections found" });
-        emptyEl.createDiv({ cls: "bionic-empty-guidance", text: "Use `[[Note Name]]` wikilinks inside your notes to build a web of interconnected ideas." });
-        const actionBtn = emptyEl.createDiv({ cls: "bionic-empty-action-btn" });
-        const btnIcon = actionBtn.createSpan({ cls: "bionic-btn-icon" });
+        emptyEl.createDiv({ cls: "hometab-empty-title", text: "No connections found" });
+        emptyEl.createDiv({ cls: "hometab-empty-guidance", text: "Use `[[Note Name]]` wikilinks inside your notes to build a web of interconnected ideas." });
+        const actionBtn = emptyEl.createDiv({ cls: "hometab-empty-action-btn" });
+        const btnIcon = actionBtn.createSpan({ cls: "hometab-btn-icon" });
         (0, import_obsidian12.setIcon)(btnIcon, "plus");
         actionBtn.createSpan({ text: "Create Linked Note" });
         actionBtn.addEventListener("click", () => {
@@ -1580,12 +1580,12 @@ var BacklinksWidget = class extends BaseWidget {
         return;
       }
       for (const file of markdownFiles) {
-        const itemEl = listEl.createDiv({ cls: "bionic-backlink-item" });
-        const iconEl = itemEl.createDiv({ cls: "bionic-backlink-icon" });
+        const itemEl = listEl.createDiv({ cls: "hometab-backlink-item" });
+        const iconEl = itemEl.createDiv({ cls: "hometab-backlink-icon" });
         (0, import_obsidian12.setIcon)(iconEl, "file-text");
-        const titleEl = itemEl.createDiv({ cls: "bionic-backlink-title", text: file.basename });
-        const badgeEl = itemEl.createDiv({ cls: "bionic-backlink-badge" });
-        const badgeIcon = badgeEl.createDiv({ cls: "bionic-backlink-badge-icon" });
+        const titleEl = itemEl.createDiv({ cls: "hometab-backlink-title", text: file.basename });
+        const badgeEl = itemEl.createDiv({ cls: "hometab-backlink-badge" });
+        const badgeIcon = badgeEl.createDiv({ cls: "hometab-backlink-badge-icon" });
         (0, import_obsidian12.setIcon)(badgeIcon, "link-2-off");
         badgeEl.createSpan({ text: "0 links" });
         itemEl.addEventListener("click", () => {
@@ -1595,12 +1595,12 @@ var BacklinksWidget = class extends BaseWidget {
       return;
     }
     for (const item of items) {
-      const itemEl = listEl.createDiv({ cls: "bionic-backlink-item" });
-      const iconEl = itemEl.createDiv({ cls: "bionic-backlink-icon" });
+      const itemEl = listEl.createDiv({ cls: "hometab-backlink-item" });
+      const iconEl = itemEl.createDiv({ cls: "hometab-backlink-icon" });
       (0, import_obsidian12.setIcon)(iconEl, "file-text");
-      const titleEl = itemEl.createDiv({ cls: "bionic-backlink-title", text: item.file.basename });
-      const badgeEl = itemEl.createDiv({ cls: "bionic-backlink-badge" });
-      const badgeIcon = badgeEl.createDiv({ cls: "bionic-backlink-badge-icon" });
+      const titleEl = itemEl.createDiv({ cls: "hometab-backlink-title", text: item.file.basename });
+      const badgeEl = itemEl.createDiv({ cls: "hometab-backlink-badge" });
+      const badgeIcon = badgeEl.createDiv({ cls: "hometab-backlink-badge-icon" });
       (0, import_obsidian12.setIcon)(badgeIcon, "link");
       badgeEl.createSpan({ text: `${item.count} ${item.count === 1 ? "link" : "links"}` });
       itemEl.addEventListener("click", () => {
@@ -1631,8 +1631,8 @@ var ContinueWorkingWidget = class extends BaseWidget {
       return;
     }
     this.containerEl.style.display = "flex";
-    this.containerEl.addClass("bionic-continue-working-widget");
-    const contentEl = this.containerEl.createDiv({ cls: "bionic-continue-working-content" });
+    this.containerEl.addClass("hometab-continue-working-widget");
+    const contentEl = this.containerEl.createDiv({ cls: "hometab-continue-working-content" });
     this.renderHeroSection(contentEl, data);
     this.renderDetailsSection(contentEl, data);
   }
@@ -1648,42 +1648,42 @@ var ContinueWorkingWidget = class extends BaseWidget {
     return checkExists((_a = data.lastEditedNote) == null ? void 0 : _a.path) || checkExists((_b = data.lastOpenedNote) == null ? void 0 : _b.path) || checkExists((_c = data.lastCanvas) == null ? void 0 : _c.path) || ((_e = (_d = data.lastWorkspace) == null ? void 0 : _d.tabsCount) != null ? _e : 0) > 1;
   }
   renderHeroSection(containerEl, data) {
-    const heroEl = containerEl.createDiv({ cls: "bionic-cw-hero" });
+    const heroEl = containerEl.createDiv({ cls: "hometab-cw-hero" });
     let activeNote = data.lastEditedNote || data.lastOpenedNote || data.lastCanvas;
     if (!activeNote || !this.app.vault.getAbstractFileByPath(activeNote.path)) {
       return;
     }
     const typeIcon = activeNote.path.endsWith(".canvas") ? "layout-dashboard" : "file-text";
-    const infoEl = heroEl.createDiv({ cls: "bionic-cw-hero-info" });
-    const badgeEl = infoEl.createDiv({ cls: "bionic-cw-hero-badge" });
+    const infoEl = heroEl.createDiv({ cls: "hometab-cw-hero-info" });
+    const badgeEl = infoEl.createDiv({ cls: "hometab-cw-hero-badge" });
     (0, import_obsidian13.setIcon)(badgeEl, "clock");
     badgeEl.createSpan({ text: "RECENT ACTIVITY" });
-    infoEl.createDiv({ cls: "bionic-cw-hero-title", text: activeNote.title });
+    infoEl.createDiv({ cls: "hometab-cw-hero-title", text: activeNote.title });
     let subtitle = `Opened ${this.formatTimeAgo(activeNote.timestamp)}`;
-    infoEl.createDiv({ cls: "bionic-cw-hero-subtitle", text: subtitle });
-    const btnEl = heroEl.createEl("button", { cls: "bionic-btn bionic-btn-primary bionic-cw-resume-btn" });
+    infoEl.createDiv({ cls: "hometab-cw-hero-subtitle", text: subtitle });
+    const btnEl = heroEl.createEl("button", { cls: "hometab-btn hometab-btn-primary hometab-cw-resume-btn" });
     (0, import_obsidian13.setIcon)(btnEl, "play");
     btnEl.createSpan({ text: "Resume" });
     btnEl.addEventListener("click", () => this.openNote(activeNote));
   }
   renderDetailsSection(containerEl, data) {
     var _a;
-    const gridEl = containerEl.createDiv({ cls: "bionic-cw-grid" });
+    const gridEl = containerEl.createDiv({ cls: "hometab-cw-grid" });
     const renderCard = (title, icon, item, onClick) => {
       if (!item)
         return;
       if (item.path && !this.app.vault.getAbstractFileByPath(item.path))
         return;
-      const card = gridEl.createDiv({ cls: "bionic-cw-card" });
-      const iconEl = card.createDiv({ cls: "bionic-cw-card-icon" });
+      const card = gridEl.createDiv({ cls: "hometab-cw-card" });
+      const iconEl = card.createDiv({ cls: "hometab-cw-card-icon" });
       (0, import_obsidian13.setIcon)(iconEl, icon);
-      const textEl = card.createDiv({ cls: "bionic-cw-card-text" });
-      textEl.createDiv({ cls: "bionic-cw-card-title", text: title });
+      const textEl = card.createDiv({ cls: "hometab-cw-card-text" });
+      textEl.createDiv({ cls: "hometab-cw-card-title", text: title });
       let metaText = item.title;
       if (item.tabsCount) {
         metaText = `${item.tabsCount} Tabs open`;
       }
-      textEl.createDiv({ cls: "bionic-cw-card-meta", text: metaText });
+      textEl.createDiv({ cls: "hometab-cw-card-meta", text: metaText });
       card.addEventListener("click", onClick);
     };
     if (data.lastEditedNote) {
@@ -3986,26 +3986,26 @@ var LayoutManager = class extends import_obsidian14.Component {
       this.sortableInstance.destroy();
       this.sortableInstance = null;
     }
-    containerEl.addClass("bionic-sortable-container");
+    containerEl.addClass("hometab-sortable-container");
     this.sortableInstance = sortable_esm_default.create(containerEl, {
       animation: 200,
       easing: "cubic-bezier(0.2, 0, 0, 1)",
-      handle: ".bionic-widget-header",
-      ghostClass: "bionic-widget-ghost",
-      chosenClass: "bionic-widget-chosen",
-      dragClass: "bionic-widget-drag",
-      fallbackClass: "bionic-widget-fallback",
+      handle: ".hometab-widget-header",
+      ghostClass: "hometab-widget-ghost",
+      chosenClass: "hometab-widget-chosen",
+      dragClass: "hometab-widget-drag",
+      fallbackClass: "hometab-widget-fallback",
       forceFallback: true,
       fallbackTolerance: 3,
       onStart: () => {
-        document.body.addClass("bionic-is-dragging");
+        document.body.addClass("hometab-is-dragging");
       },
       onEnd: async (evt) => {
-        document.body.removeClass("bionic-is-dragging");
+        document.body.removeClass("hometab-is-dragging");
         const newOrder = [];
-        containerEl.querySelectorAll(".bionic-widget").forEach((w) => {
+        containerEl.querySelectorAll(".hometab-widget").forEach((w) => {
           var _a;
-          const id = (_a = Array.from(w.classList).find((cls) => cls.startsWith("bionic-widget-"))) == null ? void 0 : _a.replace("bionic-widget-", "");
+          const id = (_a = Array.from(w.classList).find((cls) => cls.startsWith("hometab-widget-"))) == null ? void 0 : _a.replace("hometab-widget-", "");
           if (id) {
             newOrder.push(id);
           }
@@ -4014,9 +4014,9 @@ var LayoutManager = class extends import_obsidian14.Component {
         await this.settingsManager.saveSettings(true);
       }
     });
-    const widgets = containerEl.querySelectorAll(".bionic-widget");
+    const widgets = containerEl.querySelectorAll(".hometab-widget");
     widgets.forEach((widget) => {
-      const header = widget.querySelector(".bionic-widget-header");
+      const header = widget.querySelector(".hometab-widget-header");
       if (header) {
         header.style.cursor = "grab";
       }
@@ -4111,7 +4111,7 @@ var DashboardEngine = class extends import_obsidian15.Component {
     return url;
   }
   handleSettingsUpdated() {
-    this.containerEl.toggleClass("bionic-glass-mode", !!this.settingsManager.settings.enableGlassmorphism);
+    this.containerEl.toggleClass("hometab-glass-mode", !!this.settingsManager.settings.enableGlassmorphism);
     if (this.bgEl) {
       let bgUrl = this.settingsManager.settings.backgroundImage;
       if (bgUrl) {
@@ -4163,17 +4163,17 @@ var DashboardEngine = class extends import_obsidian15.Component {
       this.clockInterval = null;
     }
     this.containerEl.empty();
-    this.containerEl.addClass("bionic-dashboard-container");
-    this.containerEl.toggleClass("bionic-glass-mode", !!this.settingsManager.settings.enableGlassmorphism);
+    this.containerEl.addClass("hometab-dashboard-container");
+    this.containerEl.toggleClass("hometab-glass-mode", !!this.settingsManager.settings.enableGlassmorphism);
     this.renderBackground();
     this.renderSettingsMenu();
-    const scrollWrapper = this.containerEl.createDiv({ cls: "bionic-dashboard-scroll-wrapper" });
-    const contentWrapper = scrollWrapper.createDiv({ cls: "bionic-dashboard-content" });
-    this.headerEl = contentWrapper.createDiv({ cls: "bionic-header" });
+    const scrollWrapper = this.containerEl.createDiv({ cls: "hometab-dashboard-scroll-wrapper" });
+    const contentWrapper = scrollWrapper.createDiv({ cls: "hometab-dashboard-content" });
+    this.headerEl = contentWrapper.createDiv({ cls: "hometab-header" });
     this.renderHeader();
-    this.searchAreaEl = contentWrapper.createDiv({ cls: "bionic-search-area" });
+    this.searchAreaEl = contentWrapper.createDiv({ cls: "hometab-search-area" });
     this.renderSearchArea();
-    this.widgetsGridEl = contentWrapper.createDiv({ cls: "bionic-widgets-grid" });
+    this.widgetsGridEl = contentWrapper.createDiv({ cls: "hometab-widgets-grid" });
     this.widgetManager.renderWidgets(this.widgetsGridEl, this.settingsManager.settings.widgetOrder);
     this.layoutManager.bindDraggable(this.widgetsGridEl);
   }
@@ -4182,7 +4182,7 @@ var DashboardEngine = class extends import_obsidian15.Component {
     if (!bgUrl)
       return;
     bgUrl = this.resolveWallpaperUrl(bgUrl);
-    this.bgEl = this.containerEl.createDiv({ cls: "bionic-dashboard-background" });
+    this.bgEl = this.containerEl.createDiv({ cls: "hometab-dashboard-background" });
     this.bgEl.style.backgroundImage = `url("${bgUrl}")`;
     this.bgEl.style.opacity = this.settingsManager.settings.backgroundOpacity.toString();
     this.bgEl.style.backgroundSize = this.settingsManager.settings.wallpaperFit || "cover";
@@ -4201,18 +4201,18 @@ var DashboardEngine = class extends import_obsidian15.Component {
     } else {
       greetingPrefix = "Good night";
     }
-    const titleContainer = this.headerEl.createDiv({ cls: "bionic-greeting-container" });
+    const titleContainer = this.headerEl.createDiv({ cls: "hometab-greeting-container" });
     const logoPath = this.app.vault.adapter.getResourcePath(".obsidian/plugins/enhanced-hometab/obsidianlogo.webp");
     titleContainer.createEl("img", {
-      cls: "bionic-greeting-logo",
+      cls: "hometab-greeting-logo",
       attr: {
         src: logoPath,
         alt: "Obsidian Logo"
       }
     });
-    titleContainer.createEl("h1", { text: `${greetingPrefix}, ${greetingName} \u{1F44B}`, cls: "bionic-greeting" });
+    titleContainer.createEl("h1", { text: `${greetingPrefix}, ${greetingName} \u{1F44B}`, cls: "hometab-greeting" });
     if (this.settingsManager.settings.showDate) {
-      const dateEl = this.headerEl.createEl("p", { cls: "bionic-date" });
+      const dateEl = this.headerEl.createEl("p", { cls: "hometab-date" });
       const updateTime = () => {
         const now = /* @__PURE__ */ new Date();
         const dateString = now.toLocaleDateString(void 0, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
@@ -4231,24 +4231,24 @@ var DashboardEngine = class extends import_obsidian15.Component {
     this.searchBar.render();
   }
   renderSettingsMenu() {
-    const settingsBtnEl = this.containerEl.createEl("button", { cls: "bionic-quick-settings-btn" });
+    const settingsBtnEl = this.containerEl.createEl("button", { cls: "hometab-quick-settings-btn" });
     (0, import_obsidian15.setIcon)(settingsBtnEl, "more-horizontal");
-    const dropdownEl = this.containerEl.createDiv({ cls: "bionic-quick-settings-dropdown hidden" });
-    dropdownEl.createEl("div", { cls: "bionic-quick-settings-header", text: "Wallpaper" });
-    const bgUrlWrapper = dropdownEl.createDiv({ cls: "bionic-settings-input-wrapper bionic-wallpaper-input-wrapper" });
+    const dropdownEl = this.containerEl.createDiv({ cls: "hometab-quick-settings-dropdown hidden" });
+    dropdownEl.createEl("div", { cls: "hometab-quick-settings-header", text: "Wallpaper" });
+    const bgUrlWrapper = dropdownEl.createDiv({ cls: "hometab-settings-input-wrapper hometab-wallpaper-input-wrapper" });
     const bgUrlInput = bgUrlWrapper.createEl("input", {
       type: "text",
       placeholder: "Image URL...",
       value: this.settingsManager.settings.backgroundImage || "",
-      cls: "bionic-settings-text-input"
+      cls: "hometab-settings-text-input"
     });
-    const setBgBtn = bgUrlWrapper.createEl("button", { text: "Set", cls: "bionic-wallpaper-set-btn" });
-    const localPickerBtn = bgUrlWrapper.createEl("button", { cls: "bionic-wallpaper-local-btn", title: "Upload Local Image" });
+    const setBgBtn = bgUrlWrapper.createEl("button", { text: "Set", cls: "hometab-wallpaper-set-btn" });
+    const localPickerBtn = bgUrlWrapper.createEl("button", { cls: "hometab-wallpaper-local-btn", title: "Upload Local Image" });
     (0, import_obsidian15.setIcon)(localPickerBtn, "image-plus");
     const fileInput = bgUrlWrapper.createEl("input", {
       type: "file",
       attr: { accept: "image/*" },
-      cls: "bionic-wallpaper-file-input hidden"
+      cls: "hometab-wallpaper-file-input hidden"
     });
     localPickerBtn.addEventListener("click", () => fileInput.click());
     const addWallpaperToHistory = async (url) => {
@@ -4334,9 +4334,9 @@ var DashboardEngine = class extends import_obsidian15.Component {
         addWallpaperToHistory("local:" + filePath);
       }
     });
-    const fitWrapper = dropdownEl.createDiv({ cls: "bionic-settings-dropdown-wrapper" });
-    fitWrapper.createSpan({ text: "Fit:", cls: "bionic-settings-label" });
-    const fitSelect = fitWrapper.createEl("select", { cls: "bionic-settings-select" });
+    const fitWrapper = dropdownEl.createDiv({ cls: "hometab-settings-dropdown-wrapper" });
+    fitWrapper.createSpan({ text: "Fit:", cls: "hometab-settings-label" });
+    const fitSelect = fitWrapper.createEl("select", { cls: "hometab-settings-select" });
     fitSelect.createEl("option", { value: "cover", text: "Cover" });
     fitSelect.createEl("option", { value: "contain", text: "Contain" });
     fitSelect.value = this.settingsManager.settings.wallpaperFit || "cover";
@@ -4345,12 +4345,12 @@ var DashboardEngine = class extends import_obsidian15.Component {
       await this.settingsManager.saveSettings();
       this.app.workspace.trigger("enhanced-hometab:settings-updated");
     });
-    const bgOpacityWrapper = dropdownEl.createDiv({ cls: "bionic-settings-slider-wrapper" });
-    bgOpacityWrapper.createSpan({ text: "Opacity:", cls: "bionic-settings-label" });
+    const bgOpacityWrapper = dropdownEl.createDiv({ cls: "hometab-settings-slider-wrapper" });
+    bgOpacityWrapper.createSpan({ text: "Opacity:", cls: "hometab-settings-label" });
     const bgOpacityInput = bgOpacityWrapper.createEl("input", {
       type: "range",
       attr: { min: "0", max: "1", step: "0.05" },
-      cls: "bionic-settings-slider"
+      cls: "hometab-settings-slider"
     });
     bgOpacityInput.value = this.settingsManager.settings.backgroundOpacity.toString();
     bgOpacityInput.addEventListener("change", async () => {
@@ -4358,20 +4358,20 @@ var DashboardEngine = class extends import_obsidian15.Component {
       await this.settingsManager.saveSettings();
       this.app.workspace.trigger("enhanced-hometab:settings-updated");
     });
-    const galleryContainer = dropdownEl.createDiv({ cls: "bionic-wallpaper-gallery" });
+    const galleryContainer = dropdownEl.createDiv({ cls: "hometab-wallpaper-gallery" });
     this.renderWallpaperGallery(galleryContainer, bgUrlInput);
-    const glassItemEl = dropdownEl.createDiv({ cls: "bionic-quick-settings-item" });
+    const glassItemEl = dropdownEl.createDiv({ cls: "hometab-quick-settings-item" });
     glassItemEl.createSpan({ text: "Glassmorphism UI" });
-    const glassToggleWrapper = glassItemEl.createDiv({ cls: "bionic-toggle-wrapper" });
-    const glassToggleEl = glassToggleWrapper.createEl("input", { type: "checkbox", cls: "bionic-toggle-checkbox" });
+    const glassToggleWrapper = glassItemEl.createDiv({ cls: "hometab-toggle-wrapper" });
+    const glassToggleEl = glassToggleWrapper.createEl("input", { type: "checkbox", cls: "hometab-toggle-checkbox" });
     glassToggleEl.checked = this.settingsManager.settings.enableGlassmorphism;
     glassToggleEl.addEventListener("change", async () => {
       this.settingsManager.settings.enableGlassmorphism = glassToggleEl.checked;
       await this.settingsManager.saveSettings();
       this.app.workspace.trigger("enhanced-hometab:settings-updated");
     });
-    dropdownEl.createEl("hr", { cls: "bionic-settings-divider" });
-    dropdownEl.createEl("div", { cls: "bionic-quick-settings-header", text: "Dashboard Widgets" });
+    dropdownEl.createEl("hr", { cls: "hometab-settings-divider" });
+    dropdownEl.createEl("div", { cls: "hometab-quick-settings-header", text: "Dashboard Widgets" });
     const widgetsToToggle = [
       { id: "continue-working", name: "Continue Working" },
       { id: "quick-actions", name: "Quick Actions" },
@@ -4383,10 +4383,10 @@ var DashboardEngine = class extends import_obsidian15.Component {
     ];
     widgetsToToggle.forEach((widget) => {
       var _a;
-      const itemEl = dropdownEl.createDiv({ cls: "bionic-quick-settings-item" });
+      const itemEl = dropdownEl.createDiv({ cls: "hometab-quick-settings-item" });
       itemEl.createSpan({ text: widget.name });
-      const toggleWrapper = itemEl.createDiv({ cls: "bionic-toggle-wrapper" });
-      const toggleEl = toggleWrapper.createEl("input", { type: "checkbox", cls: "bionic-toggle-checkbox" });
+      const toggleWrapper = itemEl.createDiv({ cls: "hometab-toggle-wrapper" });
+      const toggleEl = toggleWrapper.createEl("input", { type: "checkbox", cls: "hometab-toggle-checkbox" });
       toggleEl.checked = ((_a = this.settingsManager.settings.widgets[widget.id]) == null ? void 0 : _a.enabled) !== false;
       toggleEl.addEventListener("change", async () => {
         if (!this.settingsManager.settings.widgets[widget.id]) {
@@ -4421,7 +4421,7 @@ var DashboardEngine = class extends import_obsidian15.Component {
     if (wallpapers.length === 0)
       return;
     wallpapers.forEach((url) => {
-      const thumb = container.createDiv({ cls: "bionic-wallpaper-thumbnail" });
+      const thumb = container.createDiv({ cls: "hometab-wallpaper-thumbnail" });
       if (url === this.settingsManager.settings.backgroundImage) {
         thumb.addClass("active");
       }
@@ -4437,7 +4437,7 @@ var DashboardEngine = class extends import_obsidian15.Component {
         this.app.workspace.trigger("enhanced-hometab:settings-updated");
         this.renderWallpaperGallery(container, urlInput);
       });
-      const deleteBtn = thumb.createDiv({ cls: "bionic-wallpaper-delete-btn" });
+      const deleteBtn = thumb.createDiv({ cls: "hometab-wallpaper-delete-btn" });
       (0, import_obsidian15.setIcon)(deleteBtn, "x");
       deleteBtn.addEventListener("click", async (e) => {
         e.stopPropagation();

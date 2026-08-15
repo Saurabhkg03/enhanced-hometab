@@ -25,9 +25,9 @@ export class ContinueWorkingWidget extends BaseWidget {
         }
 
         this.containerEl.style.display = "flex";
-        this.containerEl.addClass("bionic-continue-working-widget");
+        this.containerEl.addClass("hometab-continue-working-widget");
 
-        const contentEl = this.containerEl.createDiv({ cls: "bionic-continue-working-content" });
+        const contentEl = this.containerEl.createDiv({ cls: "hometab-continue-working-content" });
 
         // Hero Section
         this.renderHeroSection(contentEl, data!);
@@ -54,7 +54,7 @@ export class ContinueWorkingWidget extends BaseWidget {
     }
 
     private renderHeroSection(containerEl: HTMLElement, data: ContinueWorkingHistory) {
-        const heroEl = containerEl.createDiv({ cls: "bionic-cw-hero" });
+        const heroEl = containerEl.createDiv({ cls: "hometab-cw-hero" });
         
         // Find the most relevant active item
         let activeNote = data.lastEditedNote || data.lastOpenedNote || data.lastCanvas;
@@ -65,17 +65,17 @@ export class ContinueWorkingWidget extends BaseWidget {
 
         const typeIcon = activeNote.path.endsWith('.canvas') ? 'layout-dashboard' : 'file-text';
 
-        const infoEl = heroEl.createDiv({ cls: "bionic-cw-hero-info" });
-        const badgeEl = infoEl.createDiv({ cls: "bionic-cw-hero-badge" });
+        const infoEl = heroEl.createDiv({ cls: "hometab-cw-hero-info" });
+        const badgeEl = infoEl.createDiv({ cls: "hometab-cw-hero-badge" });
         setIcon(badgeEl, "clock");
         badgeEl.createSpan({ text: "RECENT ACTIVITY" });
 
-        infoEl.createDiv({ cls: "bionic-cw-hero-title", text: activeNote.title });
+        infoEl.createDiv({ cls: "hometab-cw-hero-title", text: activeNote.title });
         
         let subtitle = `Opened ${this.formatTimeAgo(activeNote.timestamp)}`;
-        infoEl.createDiv({ cls: "bionic-cw-hero-subtitle", text: subtitle });
+        infoEl.createDiv({ cls: "hometab-cw-hero-subtitle", text: subtitle });
 
-        const btnEl = heroEl.createEl("button", { cls: "bionic-btn bionic-btn-primary bionic-cw-resume-btn" });
+        const btnEl = heroEl.createEl("button", { cls: "hometab-btn hometab-btn-primary hometab-cw-resume-btn" });
         setIcon(btnEl, "play");
         btnEl.createSpan({ text: "Resume" });
 
@@ -83,26 +83,26 @@ export class ContinueWorkingWidget extends BaseWidget {
     }
 
     private renderDetailsSection(containerEl: HTMLElement, data: ContinueWorkingHistory) {
-        const gridEl = containerEl.createDiv({ cls: "bionic-cw-grid" });
+        const gridEl = containerEl.createDiv({ cls: "hometab-cw-grid" });
 
         const renderCard = (title: string, icon: string, item: any, onClick: () => void) => {
             if (!item) return;
             // Validate existence
             if (item.path && !this.app.vault.getAbstractFileByPath(item.path)) return;
 
-            const card = gridEl.createDiv({ cls: "bionic-cw-card" });
-            const iconEl = card.createDiv({ cls: "bionic-cw-card-icon" });
+            const card = gridEl.createDiv({ cls: "hometab-cw-card" });
+            const iconEl = card.createDiv({ cls: "hometab-cw-card-icon" });
             setIcon(iconEl, icon);
 
-            const textEl = card.createDiv({ cls: "bionic-cw-card-text" });
-            textEl.createDiv({ cls: "bionic-cw-card-title", text: title });
+            const textEl = card.createDiv({ cls: "hometab-cw-card-text" });
+            textEl.createDiv({ cls: "hometab-cw-card-title", text: title });
             
             let metaText = item.title;
             if (item.tabsCount) {
                 metaText = `${item.tabsCount} Tabs open`;
             }
 
-            textEl.createDiv({ cls: "bionic-cw-card-meta", text: metaText });
+            textEl.createDiv({ cls: "hometab-cw-card-meta", text: metaText });
 
             card.addEventListener("click", onClick);
         };

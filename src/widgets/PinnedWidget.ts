@@ -20,7 +20,7 @@ export class PinnedWidget extends BaseWidget {
     }
 
     render(): void {
-        const listEl = this.containerEl.createDiv({ cls: "bionic-recent-notes-list" }); 
+        const listEl = this.containerEl.createDiv({ cls: "hometab-recent-notes-list" }); 
         
         let bookmarks: any[] = [];
         const bookmarksPlugin = (this.app as any).internalPlugins?.plugins?.bookmarks?.instance;
@@ -30,16 +30,16 @@ export class PinnedWidget extends BaseWidget {
         }
         
         if (bookmarks.length === 0) {
-            const emptyEl = listEl.createDiv({ cls: "bionic-rich-empty-state" });
+            const emptyEl = listEl.createDiv({ cls: "hometab-rich-empty-state" });
             
-            const iconBadge = emptyEl.createDiv({ cls: "bionic-empty-icon-badge" });
+            const iconBadge = emptyEl.createDiv({ cls: "hometab-empty-icon-badge" });
             setIcon(iconBadge, "bookmark");
             
-            emptyEl.createDiv({ cls: "bionic-empty-title", text: "No pinned notes" });
-            emptyEl.createDiv({ cls: "bionic-empty-guidance", text: "Right-click any file in your file explorer and choose 'Bookmark' to pin it here." });
+            emptyEl.createDiv({ cls: "hometab-empty-title", text: "No pinned notes" });
+            emptyEl.createDiv({ cls: "hometab-empty-guidance", text: "Right-click any file in your file explorer and choose 'Bookmark' to pin it here." });
             
-            const actionBtn = emptyEl.createDiv({ cls: "bionic-empty-action-btn" });
-            const btnIcon = actionBtn.createSpan({ cls: "bionic-btn-icon" });
+            const actionBtn = emptyEl.createDiv({ cls: "hometab-empty-action-btn" });
+            const btnIcon = actionBtn.createSpan({ cls: "hometab-btn-icon" });
             setIcon(btnIcon, "search");
             actionBtn.createSpan({ text: "Browse Files" });
             
@@ -53,13 +53,13 @@ export class PinnedWidget extends BaseWidget {
         }
 
         for (const bookmark of bookmarks.slice(0, 5)) {
-            const itemEl = listEl.createDiv({ cls: "bionic-list-item" });
+            const itemEl = listEl.createDiv({ cls: "hometab-list-item" });
             
-            const iconEl = itemEl.createDiv({ cls: "bionic-list-item-icon" });
+            const iconEl = itemEl.createDiv({ cls: "hometab-list-item-icon" });
             setIcon(iconEl, "pin");
             
-            const infoEl = itemEl.createDiv({ cls: "bionic-list-item-info" });
-            infoEl.createDiv({ cls: "bionic-list-item-title", text: bookmark.title || bookmark.path.split('/').pop()?.replace('.md', '') });
+            const infoEl = itemEl.createDiv({ cls: "hometab-list-item-info" });
+            infoEl.createDiv({ cls: "hometab-list-item-title", text: bookmark.title || bookmark.path.split('/').pop()?.replace('.md', '') });
             
             const file = this.app.vault.getAbstractFileByPath(bookmark.path);
             if (file && file instanceof TFile) {
@@ -69,13 +69,13 @@ export class PinnedWidget extends BaseWidget {
                     metaText = cache.tags[0].tag;
                 }
                 
-                infoEl.createDiv({ cls: "bionic-list-item-meta bionic-tag-meta", text: metaText });
+                infoEl.createDiv({ cls: "hometab-list-item-meta hometab-tag-meta", text: metaText });
                 
                 itemEl.addEventListener("click", () => {
                     this.app.workspace.getLeaf(false).openFile(file);
                 });
             } else {
-                infoEl.createDiv({ cls: "bionic-list-item-meta bionic-tag-meta", text: "#pinned" });
+                infoEl.createDiv({ cls: "hometab-list-item-meta hometab-tag-meta", text: "#pinned" });
             }
         }
     }

@@ -74,12 +74,12 @@
   "pinnedSearches": [],
   "continueWorkingData": {
     "lastWorkspace": {
-      "timestamp": 1786209840344,
+      "timestamp": 1786275832578,
       "tabsCount": 1,
       "tabs": [
         {
-          "path": "Untitled 4.md",
-          "title": "Untitled 4",
+          "path": "COC tips.md",
+          "title": "COC tips",
           "type": "md"
         }
       ]
@@ -92,19 +92,19 @@
       "ch": 0
     },
     "lastOpenedNote": {
-      "path": "Quick Capture - 20260808223501.md",
-      "title": "Quick Capture - 20260808223501",
-      "timestamp": 1786212509652
+      "path": "COC tips.md",
+      "title": "COC tips",
+      "timestamp": 1786275829574
     },
     "lastEditedNote": {
-      "path": "Untitled 2.canvas",
-      "title": "Untitled 2",
-      "timestamp": 1786212622748
+      "path": "COC tips.md",
+      "title": "COC tips",
+      "timestamp": 1786274819864
     },
     "lastCanvas": {
-      "path": "Untitled 2.canvas",
-      "title": "Untitled 2",
-      "timestamp": 1786212620890
+      "path": "Untitled.canvas",
+      "title": "Untitled",
+      "timestamp": 1786274800313
     }
   },
   "recentWallpapers": [

@@ -113,7 +113,7 @@ export class DashboardEngine extends Component {
 
     private handleSettingsUpdated() {
         // Toggle Glassmorphism class directly without rebuilding page
-        this.containerEl.toggleClass("bionic-glass-mode", !!this.settingsManager.settings.enableGlassmorphism);
+        this.containerEl.toggleClass("hometab-glass-mode", !!this.settingsManager.settings.enableGlassmorphism);
 
         // Update Background directly
         if (this.bgEl) {
@@ -173,22 +173,22 @@ export class DashboardEngine extends Component {
             this.clockInterval = null;
         }
         this.containerEl.empty();
-        this.containerEl.addClass("bionic-dashboard-container");
-        this.containerEl.toggleClass("bionic-glass-mode", !!this.settingsManager.settings.enableGlassmorphism);
+        this.containerEl.addClass("hometab-dashboard-container");
+        this.containerEl.toggleClass("hometab-glass-mode", !!this.settingsManager.settings.enableGlassmorphism);
 
         this.renderBackground();
         this.renderSettingsMenu();
 
-        const scrollWrapper = this.containerEl.createDiv({ cls: "bionic-dashboard-scroll-wrapper" });
-        const contentWrapper = scrollWrapper.createDiv({ cls: "bionic-dashboard-content" });
+        const scrollWrapper = this.containerEl.createDiv({ cls: "hometab-dashboard-scroll-wrapper" });
+        const contentWrapper = scrollWrapper.createDiv({ cls: "hometab-dashboard-content" });
 
-        this.headerEl = contentWrapper.createDiv({ cls: "bionic-header" });
+        this.headerEl = contentWrapper.createDiv({ cls: "hometab-header" });
         this.renderHeader();
 
-        this.searchAreaEl = contentWrapper.createDiv({ cls: "bionic-search-area" });
+        this.searchAreaEl = contentWrapper.createDiv({ cls: "hometab-search-area" });
         this.renderSearchArea();
 
-        this.widgetsGridEl = contentWrapper.createDiv({ cls: "bionic-widgets-grid" });
+        this.widgetsGridEl = contentWrapper.createDiv({ cls: "hometab-widgets-grid" });
         this.widgetManager.renderWidgets(this.widgetsGridEl, this.settingsManager.settings.widgetOrder);
         this.layoutManager.bindDraggable(this.widgetsGridEl);
     }
@@ -199,7 +199,7 @@ export class DashboardEngine extends Component {
 
         bgUrl = this.resolveWallpaperUrl(bgUrl);
 
-        this.bgEl = this.containerEl.createDiv({ cls: "bionic-dashboard-background" });
+        this.bgEl = this.containerEl.createDiv({ cls: "hometab-dashboard-background" });
         this.bgEl.style.backgroundImage = `url("${bgUrl}")`;
         this.bgEl.style.opacity = this.settingsManager.settings.backgroundOpacity.toString();
         this.bgEl.style.backgroundSize = this.settingsManager.settings.wallpaperFit || "cover";
@@ -221,21 +221,21 @@ export class DashboardEngine extends Component {
             greetingPrefix = "Good night";
         }
         
-        const titleContainer = this.headerEl.createDiv({ cls: "bionic-greeting-container" });
+        const titleContainer = this.headerEl.createDiv({ cls: "hometab-greeting-container" });
         
         const logoPath = this.app.vault.adapter.getResourcePath(".obsidian/plugins/enhanced-hometab/obsidianlogo.webp");
         titleContainer.createEl("img", {
-            cls: "bionic-greeting-logo",
+            cls: "hometab-greeting-logo",
             attr: {
                 src: logoPath,
                 alt: "Obsidian Logo"
             }
         });
         
-        titleContainer.createEl("h1", { text: `${greetingPrefix}, ${greetingName} 👋`, cls: "bionic-greeting" });
+        titleContainer.createEl("h1", { text: `${greetingPrefix}, ${greetingName} 👋`, cls: "hometab-greeting" });
         
         if (this.settingsManager.settings.showDate) {
-            const dateEl = this.headerEl.createEl("p", { cls: "bionic-date" });
+            const dateEl = this.headerEl.createEl("p", { cls: "hometab-date" });
             
             const updateTime = () => {
                 const now = new Date();
@@ -258,32 +258,32 @@ export class DashboardEngine extends Component {
     }
 
     private renderSettingsMenu() {
-        const settingsBtnEl = this.containerEl.createEl("button", { cls: "bionic-quick-settings-btn" });
+        const settingsBtnEl = this.containerEl.createEl("button", { cls: "hometab-quick-settings-btn" });
         setIcon(settingsBtnEl, "more-horizontal");
         
-        const dropdownEl = this.containerEl.createDiv({ cls: "bionic-quick-settings-dropdown hidden" });
+        const dropdownEl = this.containerEl.createDiv({ cls: "hometab-quick-settings-dropdown hidden" });
         
         // --- Background Image Settings ---
-        dropdownEl.createEl("div", { cls: "bionic-quick-settings-header", text: "Wallpaper" });
+        dropdownEl.createEl("div", { cls: "hometab-quick-settings-header", text: "Wallpaper" });
 
         // URL Input & Set Button
-        const bgUrlWrapper = dropdownEl.createDiv({ cls: "bionic-settings-input-wrapper bionic-wallpaper-input-wrapper" });
+        const bgUrlWrapper = dropdownEl.createDiv({ cls: "hometab-settings-input-wrapper hometab-wallpaper-input-wrapper" });
         const bgUrlInput = bgUrlWrapper.createEl("input", { 
             type: "text", 
             placeholder: "Image URL...",
             value: this.settingsManager.settings.backgroundImage || "",
-            cls: "bionic-settings-text-input"
+            cls: "hometab-settings-text-input"
         });
         
-        const setBgBtn = bgUrlWrapper.createEl("button", { text: "Set", cls: "bionic-wallpaper-set-btn" });
+        const setBgBtn = bgUrlWrapper.createEl("button", { text: "Set", cls: "hometab-wallpaper-set-btn" });
         
         // Local Media Picker
-        const localPickerBtn = bgUrlWrapper.createEl("button", { cls: "bionic-wallpaper-local-btn", title: "Upload Local Image" });
+        const localPickerBtn = bgUrlWrapper.createEl("button", { cls: "hometab-wallpaper-local-btn", title: "Upload Local Image" });
         setIcon(localPickerBtn, "image-plus");
         const fileInput = bgUrlWrapper.createEl("input", {
             type: "file",
             attr: { accept: "image/*" },
-            cls: "bionic-wallpaper-file-input hidden"
+            cls: "hometab-wallpaper-file-input hidden"
         });
 
         localPickerBtn.addEventListener("click", () => fileInput.click());
@@ -386,9 +386,9 @@ export class DashboardEngine extends Component {
         });
 
         // Fit setting
-        const fitWrapper = dropdownEl.createDiv({ cls: "bionic-settings-dropdown-wrapper" });
-        fitWrapper.createSpan({ text: "Fit:", cls: "bionic-settings-label" });
-        const fitSelect = fitWrapper.createEl("select", { cls: "bionic-settings-select" });
+        const fitWrapper = dropdownEl.createDiv({ cls: "hometab-settings-dropdown-wrapper" });
+        fitWrapper.createSpan({ text: "Fit:", cls: "hometab-settings-label" });
+        const fitSelect = fitWrapper.createEl("select", { cls: "hometab-settings-select" });
         fitSelect.createEl("option", { value: "cover", text: "Cover" });
         fitSelect.createEl("option", { value: "contain", text: "Contain" });
         fitSelect.value = this.settingsManager.settings.wallpaperFit || "cover";
@@ -400,12 +400,12 @@ export class DashboardEngine extends Component {
         });
 
         // Opacity setting
-        const bgOpacityWrapper = dropdownEl.createDiv({ cls: "bionic-settings-slider-wrapper" });
-        bgOpacityWrapper.createSpan({ text: "Opacity:", cls: "bionic-settings-label" });
+        const bgOpacityWrapper = dropdownEl.createDiv({ cls: "hometab-settings-slider-wrapper" });
+        bgOpacityWrapper.createSpan({ text: "Opacity:", cls: "hometab-settings-label" });
         const bgOpacityInput = bgOpacityWrapper.createEl("input", { 
             type: "range", 
             attr: { min: "0", max: "1", step: "0.05" },
-            cls: "bionic-settings-slider"
+            cls: "hometab-settings-slider"
         });
         bgOpacityInput.value = this.settingsManager.settings.backgroundOpacity.toString();
         
@@ -416,15 +416,15 @@ export class DashboardEngine extends Component {
         });
 
         // Gallery container
-        const galleryContainer = dropdownEl.createDiv({ cls: "bionic-wallpaper-gallery" });
+        const galleryContainer = dropdownEl.createDiv({ cls: "hometab-wallpaper-gallery" });
         this.renderWallpaperGallery(galleryContainer, bgUrlInput);
 
         // --- Glassmorphism Toggle ---
-        const glassItemEl = dropdownEl.createDiv({ cls: "bionic-quick-settings-item" });
+        const glassItemEl = dropdownEl.createDiv({ cls: "hometab-quick-settings-item" });
         glassItemEl.createSpan({ text: "Glassmorphism UI" });
         
-        const glassToggleWrapper = glassItemEl.createDiv({ cls: "bionic-toggle-wrapper" });
-        const glassToggleEl = glassToggleWrapper.createEl("input", { type: "checkbox", cls: "bionic-toggle-checkbox" });
+        const glassToggleWrapper = glassItemEl.createDiv({ cls: "hometab-toggle-wrapper" });
+        const glassToggleEl = glassToggleWrapper.createEl("input", { type: "checkbox", cls: "hometab-toggle-checkbox" });
         glassToggleEl.checked = this.settingsManager.settings.enableGlassmorphism;
         
         glassToggleEl.addEventListener("change", async () => {
@@ -433,10 +433,10 @@ export class DashboardEngine extends Component {
             (this.app.workspace as any).trigger("enhanced-hometab:settings-updated");
         });
 
-        dropdownEl.createEl("hr", { cls: "bionic-settings-divider" });
+        dropdownEl.createEl("hr", { cls: "hometab-settings-divider" });
 
         // --- Widget Settings ---
-        dropdownEl.createEl("div", { cls: "bionic-quick-settings-header", text: "Dashboard Widgets" });
+        dropdownEl.createEl("div", { cls: "hometab-quick-settings-header", text: "Dashboard Widgets" });
 
         const widgetsToToggle = [
             { id: "continue-working", name: "Continue Working" },
@@ -449,11 +449,11 @@ export class DashboardEngine extends Component {
         ];
 
         widgetsToToggle.forEach(widget => {
-            const itemEl = dropdownEl.createDiv({ cls: "bionic-quick-settings-item" });
+            const itemEl = dropdownEl.createDiv({ cls: "hometab-quick-settings-item" });
             itemEl.createSpan({ text: widget.name });
             
-            const toggleWrapper = itemEl.createDiv({ cls: "bionic-toggle-wrapper" });
-            const toggleEl = toggleWrapper.createEl("input", { type: "checkbox", cls: "bionic-toggle-checkbox" });
+            const toggleWrapper = itemEl.createDiv({ cls: "hometab-toggle-wrapper" });
+            const toggleEl = toggleWrapper.createEl("input", { type: "checkbox", cls: "hometab-toggle-checkbox" });
             toggleEl.checked = this.settingsManager.settings.widgets[widget.id]?.enabled !== false;
             
             toggleEl.addEventListener("change", async () => {
@@ -494,7 +494,7 @@ export class DashboardEngine extends Component {
         if (wallpapers.length === 0) return;
 
         wallpapers.forEach((url) => {
-            const thumb = container.createDiv({ cls: "bionic-wallpaper-thumbnail" });
+            const thumb = container.createDiv({ cls: "hometab-wallpaper-thumbnail" });
             if (url === this.settingsManager.settings.backgroundImage) {
                 thumb.addClass("active");
             }
@@ -515,7 +515,7 @@ export class DashboardEngine extends Component {
                 this.renderWallpaperGallery(container, urlInput);
             });
 
-            const deleteBtn = thumb.createDiv({ cls: "bionic-wallpaper-delete-btn" });
+            const deleteBtn = thumb.createDiv({ cls: "hometab-wallpaper-delete-btn" });
             setIcon(deleteBtn, "x");
             deleteBtn.addEventListener("click", async (e) => {
                 e.stopPropagation();

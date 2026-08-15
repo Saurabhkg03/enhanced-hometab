@@ -20,7 +20,7 @@ export class BacklinksWidget extends BaseWidget {
     }
 
     render(): void {
-        const listEl = this.containerEl.createDiv({ cls: "bionic-backlinks-list" });
+        const listEl = this.containerEl.createDiv({ cls: "hometab-backlinks-list" });
 
         // Calculate real backlinks from app.metadataCache.resolvedLinks
         const resolvedLinks = (this.app.metadataCache as any)?.resolvedLinks || {};
@@ -57,16 +57,16 @@ export class BacklinksWidget extends BaseWidget {
                 .slice(0, 5);
 
             if (markdownFiles.length === 0) {
-                const emptyEl = listEl.createDiv({ cls: "bionic-rich-empty-state" });
+                const emptyEl = listEl.createDiv({ cls: "hometab-rich-empty-state" });
                 
-                const iconBadge = emptyEl.createDiv({ cls: "bionic-empty-icon-badge" });
+                const iconBadge = emptyEl.createDiv({ cls: "hometab-empty-icon-badge" });
                 setIcon(iconBadge, "link-2-off");
                 
-                emptyEl.createDiv({ cls: "bionic-empty-title", text: "No connections found" });
-                emptyEl.createDiv({ cls: "bionic-empty-guidance", text: "Use `[[Note Name]]` wikilinks inside your notes to build a web of interconnected ideas." });
+                emptyEl.createDiv({ cls: "hometab-empty-title", text: "No connections found" });
+                emptyEl.createDiv({ cls: "hometab-empty-guidance", text: "Use `[[Note Name]]` wikilinks inside your notes to build a web of interconnected ideas." });
                 
-                const actionBtn = emptyEl.createDiv({ cls: "bionic-empty-action-btn" });
-                const btnIcon = actionBtn.createSpan({ cls: "bionic-btn-icon" });
+                const actionBtn = emptyEl.createDiv({ cls: "hometab-empty-action-btn" });
+                const btnIcon = actionBtn.createSpan({ cls: "hometab-btn-icon" });
                 setIcon(btnIcon, "plus");
                 actionBtn.createSpan({ text: "Create Linked Note" });
                 
@@ -80,15 +80,15 @@ export class BacklinksWidget extends BaseWidget {
             }
 
             for (const file of markdownFiles) {
-                const itemEl = listEl.createDiv({ cls: "bionic-backlink-item" });
+                const itemEl = listEl.createDiv({ cls: "hometab-backlink-item" });
                 
-                const iconEl = itemEl.createDiv({ cls: "bionic-backlink-icon" });
+                const iconEl = itemEl.createDiv({ cls: "hometab-backlink-icon" });
                 setIcon(iconEl, "file-text");
 
-                const titleEl = itemEl.createDiv({ cls: "bionic-backlink-title", text: file.basename });
+                const titleEl = itemEl.createDiv({ cls: "hometab-backlink-title", text: file.basename });
 
-                const badgeEl = itemEl.createDiv({ cls: "bionic-backlink-badge" });
-                const badgeIcon = badgeEl.createDiv({ cls: "bionic-backlink-badge-icon" });
+                const badgeEl = itemEl.createDiv({ cls: "hometab-backlink-badge" });
+                const badgeIcon = badgeEl.createDiv({ cls: "hometab-backlink-badge-icon" });
                 setIcon(badgeIcon, "link-2-off");
                 badgeEl.createSpan({ text: "0 links" });
 
@@ -100,15 +100,15 @@ export class BacklinksWidget extends BaseWidget {
         }
 
         for (const item of items) {
-            const itemEl = listEl.createDiv({ cls: "bionic-backlink-item" });
+            const itemEl = listEl.createDiv({ cls: "hometab-backlink-item" });
             
-            const iconEl = itemEl.createDiv({ cls: "bionic-backlink-icon" });
+            const iconEl = itemEl.createDiv({ cls: "hometab-backlink-icon" });
             setIcon(iconEl, "file-text");
 
-            const titleEl = itemEl.createDiv({ cls: "bionic-backlink-title", text: item.file.basename });
+            const titleEl = itemEl.createDiv({ cls: "hometab-backlink-title", text: item.file.basename });
 
-            const badgeEl = itemEl.createDiv({ cls: "bionic-backlink-badge" });
-            const badgeIcon = badgeEl.createDiv({ cls: "bionic-backlink-badge-icon" });
+            const badgeEl = itemEl.createDiv({ cls: "hometab-backlink-badge" });
+            const badgeIcon = badgeEl.createDiv({ cls: "hometab-backlink-badge-icon" });
             setIcon(badgeIcon, "link");
             badgeEl.createSpan({ text: `${item.count} ${item.count === 1 ? 'link' : 'links'}` });
 
